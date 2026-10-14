@@ -1,0 +1,6 @@
+{
+  "name": "Klarity",
+  "description": "Anti-counterfeit FMCG verification and AI ingredient intelligence for personal care and cosmetics in Nigeria.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
