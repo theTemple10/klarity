@@ -224,7 +224,9 @@ fun KlarityApp(viewModel: KlarityViewModel) {
                     isLoading = isChatLoading,
                     skinProfile = skinProfile,
                     onSendMessage = { viewModel.sendDermAiMessage(it) },
-                    onBack = { viewModel.navigateTo(Screen.DASHBOARD) }
+                    onBack = { viewModel.navigateTo(Screen.DASHBOARD) },
+                    onSetCustomApiKey = { viewModel.setGeminiApiKey(it) },
+                    currentApiKey = viewModel.getEffectiveApiKey()
                 )
 
                 Screen.SKIN_QUIZ -> SkinProfileQuizScreen(

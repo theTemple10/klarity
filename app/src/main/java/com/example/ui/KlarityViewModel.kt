@@ -200,6 +200,14 @@ class KlarityViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun setGeminiApiKey(key: String) {
+        dermAiRepo.setCustomApiKey(key)
+    }
+
+    fun getEffectiveApiKey(): String {
+        return dermAiRepo.getEffectiveApiKey()
+    }
+
     fun saveSkinProfile(newProfile: SkinProfile) {
         _skinProfile.value = newProfile
         viewModelScope.launch {

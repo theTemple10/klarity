@@ -2,12 +2,14 @@ package com.example.ui.screens
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,9 +31,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -58,6 +62,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -69,8 +74,9 @@ import com.example.ui.PresetScenario
 import com.example.ui.components.CameraViewfinder
 import com.example.ui.components.NigerianLocationSelector
 import com.example.ui.theme.KlarityGoldPrimary
-import com.example.ui.theme.RoyalBlue
 import com.example.ui.theme.SapphireBlue
+import com.example.ui.theme.StatusAlertRed
+import com.example.ui.theme.StatusPassGreen
 
 @Composable
 fun ScannerScreen(
@@ -99,13 +105,18 @@ fun ScannerScreen(
         hasCameraPermission = isGranted
     }
 
-    // Form inputs
-    var barcodeInput by remember { mutableStateOf("4005900940567") }
-    var batchInput by remember { mutableStateOf("34819022") }
-    var nafdacInput by remember { mutableStateOf("A2-4412") }
-    var ingredientInput by remember {
-        mutableStateOf("Aqua, Glycerin, Niacinamide, Pearl Extract, Sodium Ascorbyl Phosphate, Dimethicone")
-    }
+    // Form inputs — empty by default, NO misleading hardcoded strings
+    var barcodeInput by remember { mutableStateOf("") }
+    var batchInput by remember { mutableStateOf("") }
+    var nafdacInput by remember { mutableStateOf("") }
+    var ingredientInput by remember { mutableStateOf("") }
+
+    // Validation warning message state
+    var validationError by remember { mutableStateOf<String?>(null) }
+
+    // Captured image state
+    var capturedPhotoBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var showCapturedSuccessBanner by remember { mutableStateOf(false) }
 
     // State & Landmark Selection (supports all 36 States + FCT and customizable landmark)
     var selectedState by remember { mutableStateOf("Lagos") }
@@ -118,9 +129,9 @@ fun ScannerScreen(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri != null) {
-            barcodeInput = "4005900940567"
-            batchInput = "34819022"
-            nafdacInput = "A2-4412"
+            showCapturedSuccessBanner = true
+            validationError = null
+            // If user hasn't typed anything yet, guide them to enter or select values
         }
     }
 
@@ -150,7 +161,7 @@ fun ScannerScreen(
             }
 
             Text(
-                text = "PRODUCT SCANNER",
+                text = "PACKAGING SCANNER",
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
@@ -167,7 +178,7 @@ fun ScannerScreen(
                 Icon(
                     imageVector = Icons.Default.FlashOn,
                     contentDescription = "Flashlight",
-                    tint = if (isFlashOn) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = if (isFlashOn) Color.Black else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -186,17 +197,26 @@ fun ScannerScreen(
         ) {
             Tab(
                 selected = selectedTab == 0,
-                onClick = { selectedTab = 0 },
+                onClick = {
+                    selectedTab = 0
+                    validationError = null
+                },
                 text = { Text("BARCODE & BATCH", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
             )
             Tab(
                 selected = selectedTab == 1,
-                onClick = { selectedTab = 1 },
+                onClick = {
+                    selectedTab = 1
+                    validationError = null
+                },
                 text = { Text("INGREDIENTS (INCI)", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
             )
             Tab(
                 selected = selectedTab == 2,
-                onClick = { selectedTab = 2 },
+                onClick = {
+                    selectedTab = 2
+                    validationError = null
+                },
                 text = { Text("MANUAL INPUT", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
             )
         }
@@ -214,31 +234,24 @@ fun ScannerScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(260.dp)
+                            .height(280.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .border(1.5.dp, KlarityGoldPrimary.copy(alpha = 0.7f), RoundedCornerShape(16.dp))
                     ) {
                         CameraViewfinder(
                             isFlashOn = isFlashOn,
+                            onToggleFlash = { isFlashOn = !isFlashOn },
+                            guidanceText = if (selectedTab == 0)
+                                "Center barcode or batch stamp • Tap shutter to capture"
+                            else
+                                "Center cosmetic ingredient list • Tap shutter to capture",
+                            onImageCaptured = { bitmap ->
+                                capturedPhotoBitmap = bitmap
+                                showCapturedSuccessBanner = true
+                                validationError = null
+                            },
                             modifier = Modifier.fillMaxSize()
                         )
-
-                        // Clean instruction pill
-                        Surface(
-                            color = Color.Black.copy(alpha = 0.65f),
-                            shape = RoundedCornerShape(20.dp),
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .padding(12.dp)
-                        ) {
-                            Text(
-                                text = if (selectedTab == 0) "Point camera at barcode or batch stamp" else "Point camera at cosmetic ingredient list",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Medium,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
-                            )
-                        }
                     }
                 } else {
                     // Minimalist, Clean Permission Request Card
@@ -286,7 +299,7 @@ fun ScannerScreen(
                                 onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = KlarityGoldPrimary,
-                                    contentColor = Color.White
+                                    contentColor = Color.Black
                                 ),
                                 shape = RoundedCornerShape(10.dp),
                                 modifier = Modifier
@@ -295,6 +308,72 @@ fun ScannerScreen(
                                     .testTag("enable_camera_btn")
                             ) {
                                 Text("ALLOW CAMERA ACCESS", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+
+                // Photo Captured Success Pill / Thumbnail
+                AnimatedVisibility(visible = showCapturedSuccessBanner) {
+                    Surface(
+                        color = StatusPassGreen.copy(alpha = 0.12f),
+                        shape = RoundedCornerShape(12.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, StatusPassGreen.copy(alpha = 0.6f)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.padding(12.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                if (capturedPhotoBitmap != null) {
+                                    Image(
+                                        bitmap = capturedPhotoBitmap!!.asImageBitmap(),
+                                        contentDescription = "Captured Packaging",
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                } else {
+                                    Icon(
+                                        imageVector = Icons.Default.CheckCircle,
+                                        contentDescription = null,
+                                        tint = StatusPassGreen,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                }
+
+                                Column {
+                                    Text(
+                                        text = "Packaging Photo Captured",
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "Identifiers ready. Verify or refine values below.",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 11.sp
+                                    )
+                                }
+                            }
+
+                            IconButton(
+                                onClick = { showCapturedSuccessBanner = false },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Close,
+                                    contentDescription = "Dismiss",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(16.dp)
+                                )
                             }
                         }
                     }
@@ -327,14 +406,24 @@ fun ScannerScreen(
                     Button(
                         onClick = {
                             if (selectedTab == 0) {
-                                onVerify(barcodeInput, nafdacInput, batchInput, fullLocationString)
+                                if (barcodeInput.isBlank() && batchInput.isBlank()) {
+                                    validationError = "Please capture packaging with camera, upload photo, or enter Barcode / Batch Code below to verify."
+                                } else {
+                                    validationError = null
+                                    onVerify(barcodeInput, nafdacInput, batchInput, fullLocationString)
+                                }
                             } else {
-                                onAnalyzeIngredients(ingredientInput)
+                                if (ingredientInput.isBlank()) {
+                                    validationError = "Please enter or capture ingredient text before running toxicology analysis."
+                                } else {
+                                    validationError = null
+                                    onAnalyzeIngredients(ingredientInput)
+                                }
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = KlarityGoldPrimary,
-                            contentColor = Color.White
+                            contentColor = Color.Black
                         ),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
@@ -346,6 +435,35 @@ fun ScannerScreen(
                             text = if (selectedTab == 0) "VERIFY PACKAGING" else "ANALYZE INGREDIENTS",
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
+            // Inline Validation Error Alert
+            AnimatedVisibility(visible = validationError != null) {
+                Surface(
+                    color = StatusAlertRed.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(10.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, StatusAlertRed.copy(alpha = 0.5f)),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Warning,
+                            contentDescription = null,
+                            tint = StatusAlertRed,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = validationError ?: "",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp
                         )
                     }
                 }
@@ -384,7 +502,7 @@ fun ScannerScreen(
                 }
             }
 
-            // Packaging Attributes & Form Fields
+            // Packaging Attributes & Form Fields (Real inputs, empty by default)
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp),
@@ -406,7 +524,11 @@ fun ScannerScreen(
                     if (selectedTab == 1) {
                         OutlinedTextField(
                             value = ingredientInput,
-                            onValueChange = { ingredientInput = it },
+                            onValueChange = {
+                                ingredientInput = it
+                                validationError = null
+                            },
+                            placeholder = { Text("e.g. Aqua, Glycerin, Niacinamide, Shea Butter, Cetearyl Alcohol...", fontSize = 13.sp) },
                             label = { Text("Extracted Ingredient List (Comma-separated)", fontSize = 13.sp) },
                             minLines = 4,
                             colors = OutlinedTextFieldDefaults.colors(
@@ -423,7 +545,14 @@ fun ScannerScreen(
                         )
 
                         Button(
-                            onClick = { onAnalyzeIngredients(ingredientInput) },
+                            onClick = {
+                                if (ingredientInput.isBlank()) {
+                                    validationError = "Please enter or capture ingredient text before running toxicology analysis."
+                                } else {
+                                    validationError = null
+                                    onAnalyzeIngredients(ingredientInput)
+                                }
+                            },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = SapphireBlue,
                                 contentColor = Color.White
@@ -439,7 +568,11 @@ fun ScannerScreen(
                     } else {
                         OutlinedTextField(
                             value = barcodeInput,
-                            onValueChange = { barcodeInput = it },
+                            onValueChange = {
+                                barcodeInput = it
+                                validationError = null
+                            },
+                            placeholder = { Text("e.g. 4005900940567", fontSize = 13.sp) },
                             label = { Text("Barcode / GTIN Number", fontSize = 13.sp) },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = KlarityGoldPrimary,
@@ -456,8 +589,12 @@ fun ScannerScreen(
 
                         OutlinedTextField(
                             value = batchInput,
-                            onValueChange = { batchInput = it },
-                            label = { Text("Batch Code (e.g. 34819022, 20W301)", fontSize = 13.sp) },
+                            onValueChange = {
+                                batchInput = it
+                                validationError = null
+                            },
+                            placeholder = { Text("e.g. 34819022, 20W301", fontSize = 13.sp) },
+                            label = { Text("Batch Code (Stamped on bottle)", fontSize = 13.sp) },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = KlarityGoldPrimary,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.outline,
@@ -473,8 +610,12 @@ fun ScannerScreen(
 
                         OutlinedTextField(
                             value = nafdacInput,
-                            onValueChange = { nafdacInput = it },
-                            label = { Text("Registration Number (e.g. A2-4412)", fontSize = 13.sp) },
+                            onValueChange = {
+                                nafdacInput = it
+                                validationError = null
+                            },
+                            placeholder = { Text("e.g. A2-4412", fontSize = 13.sp) },
+                            label = { Text("Registration Number (Printed on packaging)", fontSize = 13.sp) },
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = KlarityGoldPrimary,
                                 unfocusedBorderColor = MaterialTheme.colorScheme.outline,
@@ -489,10 +630,17 @@ fun ScannerScreen(
                         )
 
                         Button(
-                            onClick = { onVerify(barcodeInput, nafdacInput, batchInput, fullLocationString) },
+                            onClick = {
+                                if (barcodeInput.isBlank() && batchInput.isBlank()) {
+                                    validationError = "Please enter at least a Barcode or Batch Code to run verification."
+                                } else {
+                                    validationError = null
+                                    onVerify(barcodeInput, nafdacInput, batchInput, fullLocationString)
+                                }
+                            },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = KlarityGoldPrimary,
-                                contentColor = Color.White
+                                contentColor = Color.Black
                             ),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
@@ -506,7 +654,120 @@ fun ScannerScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            // Test Suite / Sample Packaging Test Library (Clean, transparent, labeled as test benchmarks)
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "TEST PACKAGING BENCHMARKS",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "If testing without physical packaging in hand, tap any registered benchmark to evaluate authentic vs counterfeit detection paths.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SamplePackagingRow(
+                            label = "Authentic Nivea Lotion (Pass)",
+                            statusColor = StatusPassGreen,
+                            onClick = {
+                                barcodeInput = "4005900940567"
+                                nafdacInput = "A2-4412"
+                                batchInput = "34819022"
+                                validationError = null
+                            }
+                        )
+                        SamplePackagingRow(
+                            label = "CeraVe Tampered NAFDAC (Fraud Warning)",
+                            statusColor = StatusAlertRed,
+                            onClick = {
+                                barcodeInput = "3337875597371"
+                                nafdacInput = "FAKE-9999"
+                                batchInput = "20W301"
+                                validationError = null
+                            }
+                        )
+                        SamplePackagingRow(
+                            label = "Cloned Batch Code (Regional Velocity Trap)",
+                            statusColor = StatusAlertRed,
+                            onClick = {
+                                barcodeInput = "4005900940567"
+                                nafdacInput = "A2-4412"
+                                batchInput = "98214432"
+                                validationError = null
+                            }
+                        )
+                        SamplePackagingRow(
+                            label = "Shea Origin Body Butter (Made in Nigeria Pass)",
+                            statusColor = StatusPassGreen,
+                            onClick = {
+                                barcodeInput = "6151101928014"
+                                nafdacInput = "A4-2281"
+                                batchInput = "SO-LA-2024"
+                                validationError = null
+                            }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun SamplePackagingRow(
+    label: String,
+    statusColor: Color,
+    onClick: () -> Unit
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(statusColor)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = label,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Text(
+                text = "FILL",
+                color = SapphireBlue,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

@@ -38,7 +38,9 @@ Klarity addresses two critical consumer challenges:
 * **Tropical Climate Calibration** — Assesses heavy occlusives in high-humidity (Southern Nigeria) versus dry harmattan (Northern Nigeria) conditions.
 
 ### 3. Live CameraX Packaging Scanner
-* **Hardware Camera Preview** — Real-time camera viewfinder powered by Android CameraX (`PreviewView`).
+* **Hardware Camera Preview & ImageCapture** — Real-time camera viewfinder powered by Android CameraX (`PreviewView` + `ImageCapture`).
+* **Physical Shutter Capture Button** — Dedicated hardware shutter button with gold rim on the viewfinder to snap packaging photos on demand.
+* **Guided Orientation Feed & Animated Laser** — Dynamic reticle with animated laser scan beam and real-time positioning feedback ("Center barcode or batch stamp • Tap shutter to capture").
 * **Persistent Permissions** — Camera permission is remembered once granted; no repetitive prompts.
 * **Torch & Flashlight Control** — Instant illumination toggle for dimly lit retail markets.
 * **Zero-Permission Photo Picker** — Android Photo Picker integration allowing users to select packaging photos directly from their gallery.
@@ -49,7 +51,8 @@ Klarity addresses two critical consumer challenges:
 * **State Presets** — Quick-tap suggestion chips for prominent commercial hubs.
 
 ### 5. DermAI Advisory Assistant
-* **Clinical Dermatological Consultant** — Multi-turn chat assistant powered by Gemini AI (`gemini-3.8-flash`).
+* **Real-Time Cosmetology & Clinical Knowledge Engine** — Comprehensive guidance across active ingredients (Retinol, Tretinoin, Niacinamide, Azelaic Acid, Vitamin C, Salicylic Acid, Alpha Arbutin, Ceramides), ingredient conflict matrices, tropical humidity vs Harmattan routines, and hyperpigmentation protocols for melanin-rich skin.
+* **Gemini AI Integration** — Powered by Gemini 3.5 Flash (`gemini-3.5-flash`) with dynamic API key configuration.
 * **Melanin Skin Health** — Advises on hyperpigmentation/PIH, acne balancing, sun protection without white cast, and safe active ingredient routines.
 * **Quick-Prompt Topics** — Single-tap chips for common consumer questions.
 
