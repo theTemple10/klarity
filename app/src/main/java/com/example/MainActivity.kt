@@ -95,6 +95,7 @@ fun KlarityApp(viewModel: KlarityViewModel) {
     val appThemeMode by viewModel.appThemeMode.collectAsState()
 
     val showBottomBar = currentScreen == Screen.DASHBOARD ||
+            currentScreen == Screen.SCANNER ||
             currentScreen == Screen.DERM_AI ||
             currentScreen == Screen.SKIN_QUIZ ||
             currentScreen == Screen.SETTINGS_ABOUT

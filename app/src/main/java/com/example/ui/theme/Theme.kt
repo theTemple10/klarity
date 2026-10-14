@@ -7,12 +7,13 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Dark Theme: Midnight Navy, Sapphire Blue, Radiant Gold & Crisp White
+// Dark Theme: Deep Navy Obsidian base, Royal Gold and Sapphire Blue accents, crisp white headers
 private val KlarityDarkColorScheme = darkColorScheme(
-    primary = KlarityGoldLight,
+    primary = KlarityGoldPrimary,
     onPrimary = NavyDeep,
     primaryContainer = NavySurfaceVariant,
     onPrimaryContainer = KlarityGoldLight,
@@ -20,21 +21,21 @@ private val KlarityDarkColorScheme = darkColorScheme(
     onSecondary = PureWhite,
     secondaryContainer = NavySurface,
     onSecondaryContainer = PureWhite,
-    tertiary = KlarityGoldPrimary,
+    tertiary = SkyBlueAccent,
     onTertiary = NavyDeep,
     background = NavyDeep,
     onBackground = PureWhite,
     surface = NavySurface,
     onSurface = PureWhite,
     surfaceVariant = NavySurfaceVariant,
-    onSurfaceVariant = PureWhite,
+    onSurfaceVariant = Color(0xFFCBD5E1),
     error = StatusAlertRed,
     onError = PureWhite,
-    outline = NavyBorder,
-    outlineVariant = NavySurfaceVariant
+    outline = Color(0x33D4AF37),
+    outlineVariant = Color(0x222563EB)
 )
 
-// Light Theme: Crisp Clean White, Royal Gold, Sapphire Blue & Midnight Navy text
+// Light Theme: Crisp Clean White background, Royal Gold, Sapphire Blue and Midnight Navy text
 private val KlarityLightColorScheme = lightColorScheme(
     primary = KlarityGoldPrimary,
     onPrimary = PureWhite,

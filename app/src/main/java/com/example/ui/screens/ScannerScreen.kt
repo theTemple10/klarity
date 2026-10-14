@@ -1,5 +1,7 @@
 package com.example.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,25 +29,17 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Image
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -55,9 +49,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,30 +57,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.example.ui.PresetScenario
-import com.example.ui.components.CameraPermissionHandler
-import com.example.ui.components.CameraPermissionRationaleView
-import com.example.ui.components.QualityScoreMeter
-import com.example.ui.theme.ElectricCyan
-import com.example.ui.theme.LightSlate
-import com.example.ui.theme.ObsidianBase
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateContainer
-import com.example.ui.theme.SlateSurface
-import com.example.ui.theme.SlateSurfaceVariant
-import com.example.ui.theme.StatusAlertRed
-import com.example.ui.theme.StatusPassGreen
-import com.example.ui.theme.StatusWarningYellow
-import com.example.ui.theme.TealDark
-import kotlinx.coroutines.delay
+import com.example.ui.components.CameraViewfinder
+import com.example.ui.components.NigerianLocationSelector
+import com.example.ui.theme.KlarityGoldPrimary
+import com.example.ui.theme.RoyalBlue
+import com.example.ui.theme.SapphireBlue
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScannerScreen(
     onBack: () -> Unit,
@@ -98,66 +81,53 @@ fun ScannerScreen(
     modifier: Modifier = Modifier
 ) {
     BackHandler { onBack() }
+    val context = LocalContext.current
 
-    var selectedTab by remember { mutableIntStateOf(0) } // 0: Barcode/Batch, 1: Ingredient OCR, 2: Manual Data
+    var selectedTab by remember { mutableIntStateOf(0) } // 0: Barcode/Batch, 1: Ingredient INCI, 2: Manual Input
     var isFlashOn by remember { mutableStateOf(false) }
 
-    // Dynamic Frame Quality Simulation (Luminosity, Sharpness, Confidence)
-    var luminosity by remember { mutableFloatStateOf(0.78f) }
-    var sharpness by remember { mutableFloatStateOf(0.88f) }
-    var confidence by remember { mutableFloatStateOf(0.89f) }
+    // Persistent Camera Permission State
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
+        )
+    }
 
-    // Form Fields
-    var barcodeInput by remember { mutableStateOf("4005900940567") } // Nivea default
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        hasCameraPermission = isGranted
+    }
+
+    // Form inputs
+    var barcodeInput by remember { mutableStateOf("4005900940567") }
     var batchInput by remember { mutableStateOf("34819022") }
     var nafdacInput by remember { mutableStateOf("A2-4412") }
     var ingredientInput by remember {
         mutableStateOf("Aqua, Glycerin, Niacinamide, Pearl Extract, Sodium Ascorbyl Phosphate, Dimethicone")
     }
 
-    val nigerianMarkets = listOf(
-        "Lagos (Ikeja City Mall)",
-        "Lagos (Balogun Market)",
-        "Lagos (Idumota Wholesale)",
-        "Kano (Kantin Kwari)",
-        "Abuja (Wuse II Plaza)",
-        "Port Harcourt (Mile 1)",
-        "Onitsha (Main Market)",
-        "Ibadan (Dugbe Mall)"
-    )
-    var selectedLocation by remember { mutableStateOf(nigerianMarkets[0]) }
-    var locationExpanded by remember { mutableStateOf(false) }
+    // State & Landmark Selection (supports all 36 States + FCT and customizable landmark)
+    var selectedState by remember { mutableStateOf("Lagos") }
+    var selectedLandmark by remember { mutableStateOf("Ikeja City Mall") }
 
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    val fullLocationString = if (selectedLandmark.isNotBlank()) "$selectedState ($selectedLandmark)" else selectedState
 
-    // Safe zero-permission Photo Picker
+    // Zero-permission Photo Picker
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri != null) {
-            selectedImageUri = uri
-            // When user picks packaging photo, simulate high-confidence OCR extraction
             barcodeInput = "4005900940567"
             batchInput = "34819022"
             nafdacInput = "A2-4412"
-            confidence = 0.94f
-        }
-    }
-
-    // Gentle live oscillation to demonstrate dynamic luminosity/sharpness sensor feedback
-    LaunchedEffect(isFlashOn) {
-        while (true) {
-            delay(1500)
-            luminosity = if (isFlashOn) 0.92f else (0.75f + (Math.random().toFloat() * 0.15f))
-            sharpness = 0.85f + (Math.random().toFloat() * 0.12f)
-            confidence = (luminosity + sharpness) / 2f
         }
     }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ObsidianBase)
+            .background(MaterialTheme.colorScheme.background)
             .testTag("scanner_screen")
     ) {
         // Top Toolbar
@@ -175,14 +145,14 @@ fun ScannerScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
 
             Text(
-                text = "IMMERSIVE SCANNER",
-                color = Color.White,
-                fontSize = 14.sp,
+                text = "PRODUCT SCANNER",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
@@ -191,43 +161,43 @@ fun ScannerScreen(
                 onClick = { isFlashOn = !isFlashOn },
                 modifier = Modifier
                     .clip(CircleShape)
-                    .background(if (isFlashOn) ElectricCyan else SlateSurfaceVariant)
+                    .background(if (isFlashOn) KlarityGoldPrimary else MaterialTheme.colorScheme.surfaceVariant)
                     .testTag("flash_toggle_btn")
             ) {
                 Icon(
                     imageVector = Icons.Default.FlashOn,
                     contentDescription = "Flashlight",
-                    tint = if (isFlashOn) ObsidianBase else Color.White
+                    tint = if (isFlashOn) Color.White else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
 
-        // Mode Switcher Tabs
+        // Clean Mode Selector Tabs
         TabRow(
             selectedTabIndex = selectedTab,
-            containerColor = SlateSurface,
-            contentColor = ElectricCyan,
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = KlarityGoldPrimary,
             indicator = { tabPositions ->
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
-                    color = ElectricCyan
+                    color = KlarityGoldPrimary
                 )
             }
         ) {
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
-                text = { Text("BARCODE & BATCH", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                text = { Text("BARCODE & BATCH", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
             )
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                text = { Text("INGREDIENTS (INCI)", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                text = { Text("INGREDIENTS (INCI)", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
             )
             Tab(
                 selected = selectedTab == 2,
                 onClick = { selectedTab = 2 },
-                text = { Text("MANUAL INPUT", fontSize = 11.sp, fontWeight = FontWeight.Bold) }
+                text = { Text("MANUAL INPUT", fontSize = 12.sp, fontWeight = FontWeight.Bold) }
             )
         }
 
@@ -236,81 +206,97 @@ fun ScannerScreen(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Viewport & Reticle Area (for Tab 0 and Tab 1) with runtime CameraPermissionHandler
+            // Live Hardware Camera Viewfinder (for Tab 0 and Tab 1)
             if (selectedTab == 0 || selectedTab == 1) {
-                CameraPermissionHandler(
-                    autoPrompt = false,
-                    onManualEntryFallback = { selectedTab = 2 }
-                ) { hasPermission, requestPermission ->
-                    if (hasPermission) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(280.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(SlateSurfaceVariant)
-                                .border(1.5.dp, ElectricCyan.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
-                        ) {
-                            // Reticle overlay
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(
-                                        Brush.verticalGradient(
-                                            listOf(
-                                                Color(0x2266FCF1),
-                                                Color(0x05000000),
-                                                Color(0x2266FCF1)
-                                            )
-                                        )
-                                    )
-                            )
+                if (hasCameraPermission) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(260.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(1.5.dp, KlarityGoldPrimary.copy(alpha = 0.7f), RoundedCornerShape(16.dp))
+                    ) {
+                        CameraViewfinder(
+                            isFlashOn = isFlashOn,
+                            modifier = Modifier.fillMaxSize()
+                        )
 
-                            // Target Box
+                        // Clean instruction pill
+                        Surface(
+                            color = Color.Black.copy(alpha = 0.65f),
+                            shape = RoundedCornerShape(20.dp),
+                            modifier = Modifier
+                                .align(Alignment.BottomCenter)
+                                .padding(12.dp)
+                        ) {
+                            Text(
+                                text = if (selectedTab == 0) "Point camera at barcode or batch stamp" else "Point camera at cosmetic ingredient list",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                } else {
+                    // Minimalist, Clean Permission Request Card
+                    Card(
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                        shape = RoundedCornerShape(16.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(20.dp)
+                        ) {
                             Box(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier
-                                    .align(Alignment.Center)
-                                    .size(240.dp, 160.dp)
-                                    .border(2.dp, ElectricCyan, RoundedCornerShape(12.dp))
+                                    .size(54.dp)
+                                    .clip(CircleShape)
+                                    .background(KlarityGoldPrimary.copy(alpha = 0.15f))
                             ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = if (selectedTab == 0) Icons.Default.QrCodeScanner else Icons.Default.CameraAlt,
-                                        contentDescription = null,
-                                        tint = ElectricCyan.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(36.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = if (selectedTab == 0) "ALIGN BARCODE OR BATCH STAMP" else "ALIGN INGREDIENT INCI LIST",
-                                        color = ElectricCyan,
-                                        fontSize = 10.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Default.CameraAlt,
+                                    contentDescription = null,
+                                    tint = KlarityGoldPrimary,
+                                    modifier = Modifier.size(28.dp)
+                                )
                             }
-
-                            // Floating Quality Meter
-                            QualityScoreMeter(
-                                luminosity = luminosity,
-                                sharpness = sharpness,
-                                confidence = confidence,
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(12.dp)
-                                    .fillMaxWidth(0.92f)
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Text(
+                                text = "Camera Scanner",
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
                             )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(
+                                text = "Grant camera access to scan packaging barcodes, detect batch stamps, and read ingredient lists in real time.",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 13.sp,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 19.sp
+                            )
+                            Spacer(modifier = Modifier.height(14.dp))
+                            Button(
+                                onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = KlarityGoldPrimary,
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                                    .testTag("enable_camera_btn")
+                            ) {
+                                Text("ALLOW CAMERA ACCESS", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            }
                         }
-                    } else {
-                        CameraPermissionRationaleView(
-                            onRequestPermission = requestPermission,
-                            onManualEntry = { selectedTab = 2 },
-                            modifier = Modifier.fillMaxWidth()
-                        )
                     }
                 }
 
@@ -325,144 +311,111 @@ fun ScannerScreen(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                             )
                         },
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = ElectricCyan),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, ElectricCyan),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = SapphireBlue),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, SapphireBlue),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .weight(1f)
-                            .height(44.dp)
+                            .height(46.dp)
                             .testTag("upload_packaging_photo_btn")
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Image,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
+                        Icon(imageVector = Icons.Default.Image, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "UPLOAD PHOTO", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        Text(text = "UPLOAD PHOTO", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
 
                     Button(
                         onClick = {
                             if (selectedTab == 0) {
-                                onVerify(barcodeInput, nafdacInput, batchInput, selectedLocation)
+                                onVerify(barcodeInput, nafdacInput, batchInput, fullLocationString)
                             } else {
                                 onAnalyzeIngredients(ingredientInput)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = ElectricCyan,
-                            contentColor = ObsidianBase
+                            containerColor = KlarityGoldPrimary,
+                            contentColor = Color.White
                         ),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .weight(1.3f)
-                            .height(44.dp)
+                            .height(46.dp)
                             .testTag("trigger_scan_action_btn")
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.CameraAlt,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = if (selectedTab == 0) "VERIFY PACKAGING" else "ANALYZE INCI",
-                            fontSize = 12.sp,
+                            text = if (selectedTab == 0) "VERIFY PACKAGING" else "ANALYZE INGREDIENTS",
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
             }
 
-            // Location Selector (Crucial for Velocity Trap Auditing across Lagos / Kano / Abuja)
-            ExposedDropdownMenuBox(
-                expanded = locationExpanded,
-                onExpandedChange = { locationExpanded = !locationExpanded },
+            // Intuitive State & Landmark Location Selector
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                OutlinedTextField(
-                    value = selectedLocation,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Purchase / Scan Location (Velocity Audit)") },
-                    leadingIcon = {
-                        Icon(imageVector = Icons.Default.LocationOn, contentDescription = null, tint = ElectricCyan)
-                    },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = locationExpanded) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = ElectricCyan,
-                        unfocusedBorderColor = SlateBorder,
-                        focusedLabelColor = ElectricCyan,
-                        unfocusedLabelColor = LightSlate,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
-                    ),
-                    modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                        .fillMaxWidth()
-                        .testTag("scan_location_selector")
-                )
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "PURCHASE LOCATION AUDIT",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Select your state and closest landmark or store to cross-check regional cloned batch reports.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                ExposedDropdownMenu(
-                    expanded = locationExpanded,
-                    onDismissRequest = { locationExpanded = false },
-                    modifier = Modifier.background(SlateSurface)
-                ) {
-                    nigerianMarkets.forEach { market ->
-                        DropdownMenuItem(
-                            text = { Text(text = market, color = Color.White, fontSize = 13.sp) },
-                            onClick = {
-                                selectedLocation = market
-                                locationExpanded = false
-                            }
-                        )
-                    }
+                    NigerianLocationSelector(
+                        selectedState = selectedState,
+                        onStateSelected = { selectedState = it },
+                        landmarkInput = selectedLandmark,
+                        onLandmarkChanged = { selectedLandmark = it }
+                    )
                 }
             }
 
-            // Editable Target Fields
+            // Packaging Attributes & Form Fields
             Card(
-                colors = CardDefaults.cardColors(containerColor = SlateSurface),
-                shape = RoundedCornerShape(14.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = if (selectedTab == 1) "INGREDIENT INCI LIST" else "DETECTED PACKAGING ATTRIBUTES",
-                            color = ElectricCyan,
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
-                        )
-
-                        Text(
-                            text = "EDIT VALUES",
-                            color = LightSlate,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = if (selectedTab == 1) "COSMETIC INGREDIENTS (INCI)" else "PACKAGING IDENTIFIERS",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 0.5.sp
+                    )
 
                     if (selectedTab == 1) {
                         OutlinedTextField(
                             value = ingredientInput,
                             onValueChange = { ingredientInput = it },
-                            label = { Text("Extracted Ingredients (Comma-separated)") },
+                            label = { Text("Extracted Ingredient List (Comma-separated)", fontSize = 13.sp) },
                             minLines = 4,
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = ElectricCyan,
-                                unfocusedBorderColor = SlateBorder,
-                                focusedLabelColor = ElectricCyan,
-                                unfocusedLabelColor = LightSlate,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedBorderColor = SapphireBlue,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedLabelColor = SapphireBlue,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -472,29 +425,29 @@ fun ScannerScreen(
                         Button(
                             onClick = { onAnalyzeIngredients(ingredientInput) },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = ElectricCyan,
-                                contentColor = ObsidianBase
+                                containerColor = SapphireBlue,
+                                contentColor = Color.White
                             ),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(44.dp)
+                                .height(46.dp)
                                 .testTag("submit_inci_btn")
                         ) {
-                            Text("RUN CLINICAL INGREDIENT INTELLIGENCE", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text("RUN INGREDIENT INTELLIGENCE", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }
                     } else {
                         OutlinedTextField(
                             value = barcodeInput,
                             onValueChange = { barcodeInput = it },
-                            label = { Text("Barcode / GTIN Number") },
+                            label = { Text("Barcode / GTIN Number", fontSize = 13.sp) },
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = ElectricCyan,
-                                unfocusedBorderColor = SlateBorder,
-                                focusedLabelColor = ElectricCyan,
-                                unfocusedLabelColor = LightSlate,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedBorderColor = KlarityGoldPrimary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedLabelColor = KlarityGoldPrimary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -504,14 +457,14 @@ fun ScannerScreen(
                         OutlinedTextField(
                             value = batchInput,
                             onValueChange = { batchInput = it },
-                            label = { Text("Batch Code Stamp (e.g. 34819022)") },
+                            label = { Text("Batch Code (e.g. 34819022, 20W301)", fontSize = 13.sp) },
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = ElectricCyan,
-                                unfocusedBorderColor = SlateBorder,
-                                focusedLabelColor = ElectricCyan,
-                                unfocusedLabelColor = LightSlate,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedBorderColor = KlarityGoldPrimary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedLabelColor = KlarityGoldPrimary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -521,14 +474,14 @@ fun ScannerScreen(
                         OutlinedTextField(
                             value = nafdacInput,
                             onValueChange = { nafdacInput = it },
-                            label = { Text("NAFDAC Registration Number (e.g. A2-4412)") },
+                            label = { Text("Registration Number (e.g. A2-4412)", fontSize = 13.sp) },
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = ElectricCyan,
-                                unfocusedBorderColor = SlateBorder,
-                                focusedLabelColor = ElectricCyan,
-                                unfocusedLabelColor = LightSlate,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedBorderColor = KlarityGoldPrimary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedLabelColor = KlarityGoldPrimary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                             ),
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -536,66 +489,19 @@ fun ScannerScreen(
                         )
 
                         Button(
-                            onClick = { onVerify(barcodeInput, nafdacInput, batchInput, selectedLocation) },
+                            onClick = { onVerify(barcodeInput, nafdacInput, batchInput, fullLocationString) },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = ElectricCyan,
-                                contentColor = ObsidianBase
+                                containerColor = KlarityGoldPrimary,
+                                contentColor = Color.White
                             ),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(44.dp)
+                                .height(46.dp)
                                 .testTag("submit_verification_btn")
                         ) {
-                            Text("RUN MULTI-LAYER VERIFICATION", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                            Text("RUN AUTHENTICITY VERIFICATION", fontWeight = FontWeight.Bold, fontSize = 13.sp)
                         }
-                    }
-                }
-            }
-
-            // Quick Preset Bar for easy testing inside the scanner
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "QUICK FILL PACKAGING PRESETS:",
-                    color = LightSlate,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Surface(
-                        color = SlateSurfaceVariant,
-                        shape = RoundedCornerShape(8.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, StatusPassGreen.copy(alpha = 0.5f)),
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable {
-                                barcodeInput = "4005900940567"
-                                batchInput = "34819022"
-                                nafdacInput = "A2-4412"
-                            }
-                            .padding(8.dp)
-                    ) {
-                        Text(text = "Nivea Authentic", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
-
-                    Surface(
-                        color = SlateSurfaceVariant,
-                        shape = RoundedCornerShape(8.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, StatusAlertRed.copy(alpha = 0.5f)),
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable {
-                                barcodeInput = "4005900940567"
-                                batchInput = "98214432" // Cloned batch
-                                nafdacInput = "A2-4412"
-                            }
-                            .padding(8.dp)
-                    ) {
-                        Text(text = "Cloned Batch Trap", color = StatusAlertRed, fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

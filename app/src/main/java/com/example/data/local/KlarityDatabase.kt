@@ -187,49 +187,6 @@ abstract class KlarityDatabase : RoomDatabase() {
                     allergens = "Artificial Fragrance, Parabens"
                 )
             )
-
-            // Seed scan logs for velocity demo:
-            // Notice: Batch 98214432 (Nivea) was previously scanned in Kano & Lagos within minutes (Cloned Batch Trap trigger)
-            val now = System.currentTimeMillis()
-            scanLogDao.insertScanLog(
-                ScanLogEntity(
-                    productId = "prod_nivea_even_glow",
-                    barcode = "4005900940567",
-                    brandName = "Nivea",
-                    productName = "Radiant & Beauty Even Glow Body Lotion",
-                    batchCodeScanned = "98214432",
-                    stateLocation = "Kano (Kantin Kwari)",
-                    status = "GREEN",
-                    statusReason = "Initial legitimate retail audit",
-                    timestamp = now - 1200000 // 20 mins ago
-                )
-            )
-            scanLogDao.insertScanLog(
-                ScanLogEntity(
-                    productId = "prod_nivea_even_glow",
-                    barcode = "4005900940567",
-                    brandName = "Nivea",
-                    productName = "Radiant & Beauty Even Glow Body Lotion",
-                    batchCodeScanned = "98214432",
-                    stateLocation = "Lagos (Idumota Market)",
-                    status = "RED",
-                    statusReason = "Cloned Batch Trap: Identical batch flagged in multiple locations simultaneously",
-                    timestamp = now - 300000 // 5 mins ago
-                )
-            )
-            scanLogDao.insertScanLog(
-                ScanLogEntity(
-                    productId = "prod_shea_origin_butter",
-                    barcode = "6151101928014",
-                    brandName = "Shea Origin",
-                    productName = "Pure Cold-Pressed Virgin Shea Butter",
-                    batchCodeScanned = "SO-LA-2024",
-                    stateLocation = "Ibadan (Dugbe)",
-                    status = "GREEN",
-                    statusReason = "Verified Authentic Product",
-                    timestamp = now - 3600000
-                )
-            )
         }
     }
 }

@@ -8,9 +8,6 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -18,7 +15,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,15 +25,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.EditNote
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -49,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -61,21 +55,9 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.example.ui.theme.ElectricCyan
-import com.example.ui.theme.LightSlate
-import com.example.ui.theme.ObsidianBase
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateContainer
-import com.example.ui.theme.SlateSurface
-import com.example.ui.theme.SlateSurfaceVariant
-import com.example.ui.theme.StatusAlertRed
-import com.example.ui.theme.StatusPassGreen
+import com.example.ui.theme.KlarityGoldPrimary
+import com.example.ui.theme.SapphireBlue
 
-/**
- * CameraPermissionHandler manages runtime camera permission requests.
- * Checks permission status lifecycle-awarely, provides a rationale card when not yet granted,
- * and seamlessly provides the granted state to the child content.
- */
 @Composable
 fun CameraPermissionHandler(
     modifier: Modifier = Modifier,
@@ -96,19 +78,15 @@ fun CameraPermissionHandler(
         )
     }
 
-    var permissionRequestedCount by remember { mutableStateOf(0) }
-
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         hasCameraPermission = isGranted
-        permissionRequestedCount++
         if (isGranted) {
             onPermissionGranted()
         }
     }
 
-    // Refresh permission state on Activity resume (e.g., if user returned from Settings)
     DisposableEffect(lifecycleOwner) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -128,7 +106,6 @@ fun CameraPermissionHandler(
         }
     }
 
-    // Optionally request on initial display if configured
     LaunchedEffect(Unit) {
         if (autoPrompt && !hasCameraPermission) {
             permissionLauncher.launch(Manifest.permission.CAMERA)
@@ -142,9 +119,6 @@ fun CameraPermissionHandler(
     }
 }
 
-/**
- * Standalone Rationale UI to display inside viewports or full screen when camera permission is absent.
- */
 @Composable
 fun CameraPermissionRationaleView(
     onRequestPermission: () -> Unit,
@@ -154,64 +128,60 @@ fun CameraPermissionRationaleView(
     val context = LocalContext.current
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = SlateSurfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, ElectricCyan.copy(alpha = 0.5f)),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
         modifier = modifier
             .fillMaxWidth()
             .testTag("camera_permission_rationale_view")
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
+            modifier = Modifier.padding(20.dp)
         ) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(60.dp)
+                    .size(54.dp)
                     .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            listOf(ElectricCyan.copy(alpha = 0.25f), SlateContainer)
-                        )
-                    )
-                    .border(1.5.dp, ElectricCyan, CircleShape)
+                    .background(KlarityGoldPrimary.copy(alpha = 0.15f))
+                    .border(1.dp, KlarityGoldPrimary, CircleShape)
             ) {
                 Icon(
                     imageVector = Icons.Default.CameraAlt,
                     contentDescription = "Camera Permission",
-                    tint = ElectricCyan,
-                    modifier = Modifier.size(32.dp)
+                    tint = KlarityGoldPrimary,
+                    modifier = Modifier.size(28.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(14.dp))
 
             Text(
-                text = "CAMERA ACCESS REQUIRED",
-                color = Color.White,
-                fontSize = 15.sp,
+                text = "CAMERA ACCESS",
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                letterSpacing = 0.5.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = "Klarity needs runtime camera permission to scan product GTIN barcodes, perform on-device OCR on batch numbers, and extract INCI cosmetic ingredient lists in real time.",
-                color = LightSlate,
-                fontSize = 12.sp,
+                text = "Klarity uses the device camera to scan product GTIN barcodes, identify batch code stamps, and extract cosmetic ingredient lists in real time.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 13.sp,
                 textAlign = TextAlign.Center,
-                lineHeight = 17.sp
+                lineHeight = 19.sp
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = onRequestPermission,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = ElectricCyan,
-                    contentColor = ObsidianBase
+                    containerColor = KlarityGoldPrimary,
+                    contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier
@@ -219,16 +189,10 @@ fun CameraPermissionRationaleView(
                     .height(44.dp)
                     .testTag("grant_camera_permission_btn")
             ) {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "GRANT CAMERA ACCESS",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp
+                    fontSize = 13.sp
                 )
             }
 
@@ -241,21 +205,21 @@ fun CameraPermissionRationaleView(
                 if (onManualEntry != null) {
                     OutlinedButton(
                         onClick = onManualEntry,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = LightSlate),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                         shape = RoundedCornerShape(10.dp),
                         modifier = Modifier
                             .weight(1f)
-                            .height(38.dp)
+                            .height(40.dp)
                             .testTag("permission_fallback_manual_btn")
                     ) {
                         Icon(
                             imageVector = Icons.Default.EditNote,
                             contentDescription = null,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(text = "USE MANUAL INPUT", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                        Text(text = "MANUAL INPUT", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
 
@@ -266,21 +230,21 @@ fun CameraPermissionRationaleView(
                         }
                         context.startActivity(intent)
                     },
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = LightSlate),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .weight(1f)
-                        .height(38.dp)
+                        .height(40.dp)
                         .testTag("open_app_settings_btn")
                 ) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = null,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    Text(text = "APP SETTINGS", fontSize = 11.sp, fontWeight = FontWeight.SemiBold)
+                    Text(text = "SETTINGS", fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
         }

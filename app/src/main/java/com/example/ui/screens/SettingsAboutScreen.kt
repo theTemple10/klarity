@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Email
@@ -34,7 +33,6 @@ import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.School
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material3.Button
@@ -51,7 +49,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -63,8 +60,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.ui.AppThemeMode
-import com.example.ui.theme.KlarityGoldGlow
-import com.example.ui.theme.KlarityGoldLight
 import com.example.ui.theme.KlarityGoldPrimary
 import com.example.ui.theme.RoyalBlue
 import com.example.ui.theme.SapphireBlue
@@ -119,7 +114,7 @@ fun SettingsAboutScreen(
             }
         }
 
-        // 1. THEME SELECTION SECTION
+        // 1. APPEARANCE & THEME (Gold, Blue & White Palette)
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -129,12 +124,12 @@ fun SettingsAboutScreen(
                     .fillMaxWidth()
                     .testTag("theme_selection_card")
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(34.dp)
+                                .size(36.dp)
                                 .clip(CircleShape)
                                 .background(KlarityGoldPrimary.copy(alpha = 0.15f))
                         ) {
@@ -142,30 +137,30 @@ fun SettingsAboutScreen(
                                 imageVector = Icons.Default.Palette,
                                 contentDescription = null,
                                 tint = KlarityGoldPrimary,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(10.dp))
+                        Spacer(modifier = Modifier.width(12.dp))
                         Column {
                             Text(
                                 text = "APPEARANCE & THEME",
                                 color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = 12.sp,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                                letterSpacing = 0.5.sp
                             )
                             Text(
-                                text = "Gold, Blue & White Palette",
+                                text = "Gold, Sapphire Blue & White Palette",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 11.sp
+                                fontSize = 12.sp
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         ThemeOptionPill(
@@ -186,7 +181,7 @@ fun SettingsAboutScreen(
                         )
                         ThemeOptionPill(
                             title = "Dark",
-                            subtitle = "Royal Navy",
+                            subtitle = "Midnight Navy",
                             icon = Icons.Default.DarkMode,
                             isSelected = currentThemeMode == AppThemeMode.DARK,
                             onClick = { onSelectThemeMode(AppThemeMode.DARK) },
@@ -197,12 +192,12 @@ fun SettingsAboutScreen(
             }
         }
 
-        // 2. ABOUT KLARITY BRAND & LOGO
+        // 2. ABOUT KLARITY BRAND
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(16.dp),
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, KlarityGoldPrimary.copy(alpha = 0.6f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, KlarityGoldPrimary.copy(alpha = 0.5f)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("about_klarity_card")
@@ -211,26 +206,20 @@ fun SettingsAboutScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(20.dp)
                 ) {
-                    // Bespoke Mascot Emblem
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(110.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(
-                                Brush.radialGradient(
-                                    listOf(KlarityGoldPrimary.copy(alpha = 0.3f), Color.Transparent)
-                                )
-                            )
-                            .border(2.dp, KlarityGoldPrimary, RoundedCornerShape(20.dp))
+                            .size(90.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .border(1.5.dp, KlarityGoldPrimary, RoundedCornerShape(16.dp))
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_klarity_fun_logo_1791978487683),
+                            painter = painterResource(id = R.drawable.klarity_matured_logo_1791988657383),
                             contentDescription = "Klarity Logo",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(RoundedCornerShape(20.dp))
+                                .clip(RoundedCornerShape(16.dp))
                         )
                     }
 
@@ -240,20 +229,20 @@ fun SettingsAboutScreen(
                         Text(
                             text = "KLARITY",
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 2.sp
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Surface(
-                            color = KlarityGoldPrimary.copy(alpha = 0.2f),
+                            color = KlarityGoldPrimary.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(4.dp),
                             border = androidx.compose.foundation.BorderStroke(1.dp, KlarityGoldPrimary)
                         ) {
                             Text(
-                                text = "v1.2 PRO",
+                                text = "v1.2",
                                 color = KlarityGoldPrimary,
-                                fontSize = 10.sp,
+                                fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                             )
@@ -261,9 +250,9 @@ fun SettingsAboutScreen(
                     }
 
                     Text(
-                        text = "FMCG Authenticity Defense & Ingredient Intelligence",
+                        text = "Authenticity Verification & Cosmetic Intelligence",
                         color = SapphireBlue,
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         textAlign = TextAlign.Center
                     )
@@ -271,28 +260,33 @@ fun SettingsAboutScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "Designed specifically for Nigeria and emerging African retail markets. Klarity empowers consumers to instantly verify Fast-Moving Consumer Goods against NAFDAC standards, detect cloned batch codes across major wholesale hubs (Lagos, Kano, Abuja), and evaluate cosmetic ingredient lists using clinical toxicology for melanin-rich skin.",
+                        text = "Built for Nigeria and emerging consumer markets. Klarity defends consumers against counterfeit Fast-Moving Consumer Goods (FMCGs), detects duplicate cloned batch codes across major retail hubs, and provides personalized ingredient intelligence for melanin-rich skin.",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 12.sp,
-                        lineHeight = 18.sp,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp,
                         textAlign = TextAlign.Center
                     )
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        FeatureHighlightTag(text = "4-Layer Audit", modifier = Modifier.weight(1f))
-                        FeatureHighlightTag(text = "Velocity Trap", modifier = Modifier.weight(1f))
-                        FeatureHighlightTag(text = "Toxic Alert", modifier = Modifier.weight(1f))
+                        Text(
+                            text = "Disclaimer: Klarity is an independent consumer defense tool and is not directly affiliated with NAFDAC or regulatory authorities.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 11.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(10.dp)
+                        )
                     }
                 }
             }
         }
 
-        // 3. ABOUT THE DEVELOPER (VICTOR OLUWATIMILEYIN AKINREMI)
+        // 3. ABOUT THE DEVELOPER (AKINREMI OLUWATIMILEYIN TEMPLE)
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -328,9 +322,9 @@ fun SettingsAboutScreen(
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Victor Oluwatimileyin Akinremi",
+                                    text = "Akinremi Oluwatimileyin Temple",
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = 15.sp,
+                                    fontSize = 16.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -342,22 +336,21 @@ fun SettingsAboutScreen(
                                 )
                             }
                             Text(
-                                text = "Backend Software Engineer & AI Systems Architect",
+                                text = "Software Engineer & AI Systems Architect",
                                 color = KlarityGoldPrimary,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold
                             )
                             Text(
                                 text = "Lagos, Nigeria",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 11.sp
+                                fontSize = 12.sp
                             )
                         }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Bio & Analytical Rigor
                     Surface(
                         color = MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(10.dp),
@@ -369,40 +362,40 @@ fun SettingsAboutScreen(
                                     imageVector = Icons.Default.School,
                                     contentDescription = null,
                                     tint = KlarityGoldPrimary,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text(
                                     text = "B.Sc. Biochemistry — Obafemi Awolowo University (OAU)",
                                     color = MaterialTheme.colorScheme.onSurface,
-                                    fontSize = 12.sp,
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "A biochemistry background from OAU provides deep scientific rigor into cosmetic toxicology, dermatological pharmacology, and biostatistics — paired with production backend engineering to build life-saving consumer protection systems.",
+                                text = "A scientific background in biochemistry provides deep insight into cosmetic toxicology, dermatological pharmacology, and clinical formulation safety — bridged with robust modern software architecture to create reliable consumer protection products.",
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontSize = 11.sp,
-                                lineHeight = 16.sp
+                                fontSize = 12.sp,
+                                lineHeight = 18.sp
                             )
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Text(
-                        text = "Engineering Highlights & Notable Projects:",
+                        text = "Engineering Highlights & Expertise:",
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = 12.sp,
+                        fontSize = 13.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "• APIGuardian: Production AI-augmented API gateway with Redis rate limiting, Claude abuse detection & Prometheus metrics (61 automated tests, 84% coverage).\n• Loan Tracker & Fintech Wallet: Double-entry microservice ledger with robust transactional reliability.\n• Tech Stack: Python (FastAPI, Flask), TypeScript/Node.js, PostgreSQL (asyncpg), Redis, Docker, Linux CLI.",
+                        text = "• Distributed Systems & Cloud Backends (FastAPI, Python, TypeScript, Node.js, PostgreSQL, Redis, Docker)\n• Native Mobile Engineering (Kotlin, Jetpack Compose, CameraX, Room)\n• Machine Learning & Computer Vision Integration (OCR, Gemini AI, automated fraud detection)",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 11.sp,
-                        lineHeight = 16.sp
+                        fontSize = 12.sp,
+                        lineHeight = 18.sp
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -424,19 +417,19 @@ fun SettingsAboutScreen(
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
                                 .weight(1f)
-                                .height(42.dp)
+                                .height(44.dp)
                                 .testTag("developer_github_btn")
                         ) {
                             Icon(imageVector = Icons.Default.OpenInBrowser, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "GITHUB PROFILE", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "GITHUB PROFILE", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
 
                         OutlinedButton(
                             onClick = {
                                 val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
-                                    data = Uri.parse("mailto:akinremivictor720@gmail.com")
-                                    putExtra(Intent.EXTRA_SUBJECT, "Klarity Inquiry - Connect with Victor")
+                                    data = Uri.parse("mailto:oluwatimileyinakinremi@gmail.com")
+                                    putExtra(Intent.EXTRA_SUBJECT, "Klarity Inquiry - Connect with Temple")
                                 }
                                 context.startActivity(emailIntent)
                             },
@@ -445,12 +438,12 @@ fun SettingsAboutScreen(
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
                                 .weight(1f)
-                                .height(42.dp)
+                                .height(44.dp)
                                 .testTag("developer_email_btn")
                         ) {
                             Icon(imageVector = Icons.Default.Email, contentDescription = null, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(text = "GET IN TOUCH", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text(text = "GET IN TOUCH", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -458,7 +451,7 @@ fun SettingsAboutScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }
@@ -497,36 +490,14 @@ private fun ThemeOptionPill(
             Text(
                 text = title,
                 color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                fontSize = 12.sp,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
                 text = subtitle,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 10.sp
+                fontSize = 11.sp
             )
         }
-    }
-}
-
-@Composable
-private fun FeatureHighlightTag(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(8.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        modifier = modifier
-    ) {
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(vertical = 6.dp, horizontal = 4.dp)
-        )
     }
 }

@@ -23,14 +23,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MedicalServices
 import androidx.compose.material.icons.filled.ReportProblem
+import androidx.compose.material.icons.filled.Science
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -45,7 +45,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
@@ -60,23 +59,12 @@ import com.example.model.VerificationStatus
 import com.example.ui.PresetScenario
 import com.example.ui.Screen
 import com.example.ui.components.StatusBadge
-import com.example.ui.theme.KlarityGoldDark
-import com.example.ui.theme.KlarityGoldLight
 import com.example.ui.theme.KlarityGoldPrimary
 import com.example.ui.theme.RoyalBlue
 import com.example.ui.theme.SapphireBlue
-import com.example.ui.theme.ElectricCyan
-import com.example.ui.theme.LightSlate
-import com.example.ui.theme.ObsidianBase
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateContainer
-import com.example.ui.theme.SlateSurface
-import com.example.ui.theme.SlateSurfaceVariant
 import com.example.ui.theme.StatusAlertRed
-import com.example.ui.theme.StatusAlertRedBg
 import com.example.ui.theme.StatusPassGreen
 import com.example.ui.theme.StatusWarningYellow
-import com.example.ui.theme.TealDark
 
 @Composable
 fun DashboardScreen(
@@ -94,7 +82,7 @@ fun DashboardScreen(
             .background(MaterialTheme.colorScheme.background)
             .testTag("dashboard_screen")
     ) {
-        // Top App Header with Bespoke Mascot Emblem
+        // Refined Minimalist Header with Matured Brand Mark
         item {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -110,53 +98,34 @@ fun DashboardScreen(
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(50.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(
-                                Brush.linearGradient(
-                                    listOf(KlarityGoldPrimary.copy(alpha = 0.3f), SapphireBlue.copy(alpha = 0.2f))
-                                )
-                            )
-                            .border(1.5.dp, KlarityGoldPrimary, RoundedCornerShape(14.dp))
+                            .size(46.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, KlarityGoldPrimary.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.ic_klarity_fun_logo_1791978487683),
-                            contentDescription = "Klarity Mascot",
+                            painter = painterResource(id = R.drawable.klarity_matured_logo_1791988657383),
+                            contentDescription = "Klarity Logo",
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .clip(RoundedCornerShape(14.dp))
+                                .clip(RoundedCornerShape(12.dp))
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "KLARITY",
-                                color = MaterialTheme.colorScheme.onBackground,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 2.sp
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Surface(
-                                color = KlarityGoldPrimary.copy(alpha = 0.18f),
-                                shape = RoundedCornerShape(4.dp),
-                                border = androidx.compose.foundation.BorderStroke(1.dp, KlarityGoldPrimary.copy(alpha = 0.6f))
-                            ) {
-                                Text(
-                                    text = "NAFDAC SHIELD",
-                                    color = KlarityGoldPrimary,
-                                    fontSize = 9.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                                )
-                            }
-                        }
                         Text(
-                            text = "FMCG Authenticity & Clinical Intelligence",
+                            text = "KLARITY",
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 1.sp
+                        )
+                        Text(
+                            text = "Authenticity & Ingredient Intelligence",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 11.sp
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal
                         )
                     }
                 }
@@ -168,10 +137,10 @@ fun DashboardScreen(
                     IconButton(
                         onClick = { onNavigate(Screen.SETTINGS_ABOUT) },
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(40.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .border(1.dp, KlarityGoldPrimary.copy(alpha = 0.5f), CircleShape)
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape)
                             .testTag("settings_header_btn")
                     ) {
                         Icon(
@@ -185,10 +154,10 @@ fun DashboardScreen(
                     IconButton(
                         onClick = { onNavigate(Screen.DERM_AI) },
                         modifier = Modifier
-                            .size(42.dp)
+                            .size(40.dp)
                             .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .border(1.dp, SapphireBlue.copy(alpha = 0.6f), CircleShape)
+                            .background(MaterialTheme.colorScheme.surface)
+                            .border(1.dp, SapphireBlue.copy(alpha = 0.5f), CircleShape)
                             .testTag("derm_ai_header_btn")
                     ) {
                         Icon(
@@ -202,119 +171,184 @@ fun DashboardScreen(
             }
         }
 
-        // Hero Camera Scan CTA
+        // Hero Verification Scanner Card (Clean Glassmorphism)
         item {
             Card(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                shape = RoundedCornerShape(16.dp),
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, KlarityGoldPrimary),
+                shape = RoundedCornerShape(18.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, KlarityGoldPrimary.copy(alpha = 0.6f)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onNavigate(Screen.SCANNER) }
                     .testTag("scan_hero_card")
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            Brush.verticalGradient(
-                                listOf(KlarityGoldPrimary.copy(alpha = 0.14f), SapphireBlue.copy(alpha = 0.04f))
-                            )
-                        )
-                        .padding(20.dp)
-                ) {
-                    Column {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(CircleShape)
-                                        .background(KlarityGoldPrimary)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.CameraAlt,
-                                        contentDescription = "Scanner",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(26.dp)
-                                    )
-                                }
-                                Spacer(modifier = Modifier.width(14.dp))
-                                Column {
-                                    Text(
-                                        text = "Scan Packaging",
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = "Barcode • NAFDAC • Batch • INCI",
-                                        color = SapphireBlue,
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .size(44.dp)
+                                    .clip(CircleShape)
+                                    .background(KlarityGoldPrimary.copy(alpha = 0.15f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.CameraAlt,
+                                    contentDescription = "Scanner",
+                                    tint = KlarityGoldPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
                             }
-
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = "Go",
-                                tint = KlarityGoldPrimary
-                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = "Verify Product Authenticity",
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Barcode • Batch Code • Regulatory Check",
+                                    color = SapphireBlue,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        Text(
-                            text = "Cross-references central cosmetics ledger, validates brand batch syntax, and activates our regional Cloned Batch Trap across Lagos, Kano, and Abuja.",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 13.sp,
-                            lineHeight = 18.sp
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Open Scanner",
+                            tint = KlarityGoldPrimary,
+                            modifier = Modifier.size(20.dp)
                         )
+                    }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
-                        Button(
-                            onClick = { onNavigate(Screen.SCANNER) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = KlarityGoldPrimary,
-                                contentColor = Color.White
-                            ),
-                            shape = RoundedCornerShape(10.dp),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(46.dp)
-                                .testTag("launch_camera_scanner_btn")
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CameraAlt,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "OPEN IMMERSIVE SCANNER",
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp,
-                                fontSize = 13.sp
-                            )
-                        }
+                    Text(
+                        text = "Scan cosmetic packaging to check regulatory registration numbers, confirm authentic brand batch syntax, and flag cloned batch numbers across regional markets.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp,
+                        lineHeight = 22.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Button(
+                        onClick = { onNavigate(Screen.SCANNER) },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = KlarityGoldPrimary,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .testTag("launch_camera_scanner_btn")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.CameraAlt,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "OPEN SCANNER",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
                     }
                 }
             }
         }
 
-        // User Skin Profile Card
+        // Clean Quick Action Pillars
+        item {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Ingredient Analysis
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(14.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onNavigate(Screen.SCANNER) }
+                        .testTag("quick_ingredient_check")
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Science,
+                            contentDescription = null,
+                            tint = SapphireBlue,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Ingredient Safety",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Detect harmful bleaching agents & steroids",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+
+                // DermAI Side Advisory
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    shape = RoundedCornerShape(14.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onNavigate(Screen.DERM_AI) }
+                        .testTag("quick_derm_ai")
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.MedicalServices,
+                            contentDescription = null,
+                            tint = KlarityGoldPrimary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "DermAI Advisory",
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "Cosmetic toxicology & melanin skin care",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 12.sp,
+                            lineHeight = 16.sp
+                        )
+                    }
+                }
+            }
+        }
+
+        // User Skin Profile Status
         item {
             Card(
-                colors = CardDefaults.cardColors(containerColor = SlateSurfaceVariant),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(14.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("skin_profile_card")
@@ -329,23 +363,23 @@ fun DashboardScreen(
                             Icon(
                                 imageVector = Icons.Default.Face,
                                 contentDescription = null,
-                                tint = ElectricCyan,
+                                tint = KlarityGoldPrimary,
                                 modifier = Modifier.size(20.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = "YOUR SKIN PROFILE",
-                                color = Color.White,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                                letterSpacing = 0.5.sp
                             )
                         }
 
                         Text(
-                            text = "EDIT PROFILE",
-                            color = ElectricCyan,
-                            fontSize = 11.sp,
+                            text = "UPDATE",
+                            color = SapphireBlue,
+                            fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier
                                 .clickable { onNavigate(Screen.SKIN_QUIZ) }
@@ -361,32 +395,32 @@ fun DashboardScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Surface(
-                            color = SlateContainer,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.weight(1f)
                         ) {
                             Column(modifier = Modifier.padding(10.dp)) {
-                                Text(text = "Type", color = LightSlate, fontSize = 10.sp)
+                                Text(text = "Skin Type", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                                 Text(
                                     text = skinProfile.skinType.displayName,
-                                    color = Color.White,
-                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
                         }
 
                         Surface(
-                            color = SlateContainer,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
                             shape = RoundedCornerShape(8.dp),
                             modifier = Modifier.weight(1f)
                         ) {
                             Column(modifier = Modifier.padding(10.dp)) {
-                                Text(text = "Target Concerns", color = LightSlate, fontSize = 10.sp)
+                                Text(text = "Focus", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
                                 Text(
-                                    text = if (skinProfile.hasHyperpigmentation) "Dark Spots / PIH" else "Acne Clearing",
-                                    color = Color.White,
-                                    fontSize = 12.sp,
+                                    text = if (skinProfile.hasHyperpigmentation) "Even Tone & PIH" else "Acne Balance",
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold
                                 )
                             }
@@ -396,20 +430,20 @@ fun DashboardScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Climate: ${skinProfile.climateZone}",
-                        color = LightSlate,
-                        fontSize = 11.sp
+                        text = "Climate Region: ${skinProfile.climateZone}",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp
                     )
                 }
             }
         }
 
-        // Live Market Risk Radar (Nigerian Market Alerts)
+        // Market Security Alert (Clean & Grounded)
         item {
             Card(
-                colors = CardDefaults.cardColors(containerColor = SlateSurfaceVariant),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(14.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, StatusAlertRed.copy(alpha = 0.5f)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, StatusAlertRed.copy(alpha = 0.35f)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("market_risk_radar")
@@ -420,28 +454,28 @@ fun DashboardScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Warning,
+                            imageVector = Icons.Default.ReportProblem,
                             contentDescription = "Alert",
                             tint = StatusAlertRed,
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "NIGERIAN MARKET VELOCITY RADAR",
+                            text = "CONSUMER SECURITY ADVISORY",
                             color = StatusAlertRed,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            letterSpacing = 1.sp
+                            letterSpacing = 0.5.sp
                         )
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "• ACTIVE CLONED BATCH: Batch #98214432 (Nivea Even Glow) detected concurrently across Idumota Market (Lagos) and Kantin Kwari (Kano).\n• REGULATORY NOTICE: NAFDAC recall on unindexed mercury bleaching lotions in Trade Fair Complex.",
-                        color = LightSlate,
-                        fontSize = 12.sp,
-                        lineHeight = 17.sp
+                        text = "Be vigilant when buying cosmetics from open wholesale hubs (such as Balogun, Idumota, Kantin Kwari, or Trade Fair Complex). Confirm batch code stamping on the bottle and check that ingredient lists are free from unlisted hydroquinone or mercury.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 13.sp,
+                        lineHeight = 19.sp
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
@@ -449,136 +483,47 @@ fun DashboardScreen(
                     OutlinedButton(
                         onClick = { onNavigate(Screen.REPORT_COUNTERFEIT) },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = StatusAlertRed),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, StatusAlertRed),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, StatusAlertRed.copy(alpha = 0.6f)),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(38.dp)
+                            .height(40.dp)
                             .testTag("report_counterfeit_entry_btn")
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.ReportProblem,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "REPORT COUNTERFEIT VENDOR TO COMMUNITY",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold
+                            text = "Report Suspicious Product to Community",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
             }
         }
 
-        // Interactive Testing Scenarios (Instant 1-Tap Verification Sandbox)
-        item {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "VERIFICATION TEST SUITE (ONE-TAP DEMOS)",
-                    color = ElectricCyan,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-                Text(
-                    text = "Tap any test case below to inspect the multi-layer security engine in action:",
-                    color = LightSlate,
-                    fontSize = 12.sp
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    DemoPresetButton(
-                        title = "Authentic Nivea",
-                        subtitle = "Passes all 4 layers",
-                        status = VerificationStatus.GREEN,
-                        onClick = { onRunPreset(PresetScenario.NIVEA_AUTHENTIC) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    DemoPresetButton(
-                        title = "Cloned Batch Trap",
-                        subtitle = "Lagos vs Kano anomaly",
-                        status = VerificationStatus.RED,
-                        onClick = { onRunPreset(PresetScenario.CLONED_BATCH_TRAP) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    DemoPresetButton(
-                        title = "Tampered NAFDAC",
-                        subtitle = "Token mismatch",
-                        status = VerificationStatus.RED,
-                        onClick = { onRunPreset(PresetScenario.CERAVE_NAFDAC_TAMPERED) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    DemoPresetButton(
-                        title = "Unverified FMCG",
-                        subtitle = "Logged to community",
-                        status = VerificationStatus.YELLOW,
-                        onClick = { onRunPreset(PresetScenario.UNVERIFIED_COMMUNITY) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    DemoPresetButton(
-                        title = "Toxic Bleach Alert",
-                        subtitle = "Steroid & Mercury check",
-                        status = VerificationStatus.RED,
-                        onClick = { onRunPreset(PresetScenario.TOXIC_BLEACH_CREAM) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    DemoPresetButton(
-                        title = "Nigerian Brand",
-                        subtitle = "Shea Origin Virgin Butter",
-                        status = VerificationStatus.GREEN,
-                        onClick = { onRunPreset(PresetScenario.SHEA_ORIGIN_AUTHENTIC) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-        }
-
-        // Recent Scans Section
+        // Recent Verifications Section
         item {
             Text(
-                text = "RECENT VERIFICATION LOGS",
-                color = Color.White,
-                fontSize = 13.sp,
+                text = "RECENT VERIFICATION HISTORY",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                letterSpacing = 0.5.sp
             )
         }
 
         if (recentScans.isEmpty()) {
             item {
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = SlateSurfaceVariant),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(12.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Box(modifier = Modifier.padding(20.dp), contentAlignment = Alignment.Center) {
                         Text(
-                            text = "No recent scans yet. Tap 'Open Immersive Scanner' above to scan your first product.",
-                            color = LightSlate,
-                            fontSize = 13.sp
+                            text = "No recent verification scans yet. Tap 'Open Scanner' above to scan your first product.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 14.sp
                         )
                     }
                 }
@@ -586,9 +531,9 @@ fun DashboardScreen(
         } else {
             items(recentScans.take(5)) { log ->
                 Card(
-                    colors = CardDefaults.cardColors(containerColor = SlateSurfaceVariant),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(12.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
@@ -601,20 +546,20 @@ fun DashboardScreen(
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "${log.brandName} - ${log.productName}",
-                                color = Color.White,
-                                fontSize = 13.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 14.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = "Batch: ${log.batchCodeScanned} • Location: ${log.stateLocation}",
-                                color = LightSlate,
-                                fontSize = 11.sp
+                                text = "Batch: ${log.batchCodeScanned} • ${log.stateLocation}",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 12.sp
                             )
                             Text(
                                 text = log.statusReason,
                                 color = if (log.status == "GREEN") StatusPassGreen else if (log.status == "YELLOW") StatusWarningYellow else StatusAlertRed,
-                                fontSize = 11.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Medium
                             )
                         }
@@ -632,45 +577,7 @@ fun DashboardScreen(
         }
 
         item {
-            Spacer(modifier = Modifier.height(30.dp))
-        }
-    }
-}
-
-@Composable
-private fun DemoPresetButton(
-    title: String,
-    subtitle: String,
-    status: VerificationStatus,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val borderColor = when (status) {
-        VerificationStatus.GREEN -> StatusPassGreen.copy(alpha = 0.5f)
-        VerificationStatus.YELLOW -> StatusWarningYellow.copy(alpha = 0.5f)
-        VerificationStatus.RED -> StatusAlertRed.copy(alpha = 0.5f)
-    }
-
-    Surface(
-        color = SlateSurfaceVariant,
-        shape = RoundedCornerShape(10.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, borderColor),
-        modifier = modifier
-            .clickable { onClick() }
-            .testTag("preset_${title.replace(" ", "_")}")
-    ) {
-        Column(modifier = Modifier.padding(10.dp)) {
-            Text(
-                text = title,
-                color = Color.White,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = subtitle,
-                color = LightSlate,
-                fontSize = 10.sp
-            )
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

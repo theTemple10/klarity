@@ -39,19 +39,13 @@ import androidx.compose.ui.unit.sp
 import com.example.model.IngredientDetail
 import com.example.model.VerificationStatus
 import com.example.model.VerificationStep
-import com.example.ui.theme.ElectricCyan
-import com.example.ui.theme.LightSlate
-import com.example.ui.theme.ObsidianBase
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateSurface
-import com.example.ui.theme.SlateSurfaceVariant
+import com.example.ui.theme.KlarityGoldPrimary
 import com.example.ui.theme.StatusAlertRed
 import com.example.ui.theme.StatusAlertRedBg
 import com.example.ui.theme.StatusPassGreen
 import com.example.ui.theme.StatusPassGreenBg
 import com.example.ui.theme.StatusWarningYellow
 import com.example.ui.theme.StatusWarningYellowBg
-import com.example.ui.theme.ToxicPurple
 
 @Composable
 fun StatusBadge(
@@ -64,21 +58,21 @@ fun StatusBadge(
             StatusPassGreen,
             StatusPassGreen,
             Icons.Default.CheckCircle,
-            "VERIFIED AUTHENTIC"
+            "VERIFIED"
         )
         VerificationStatus.YELLOW -> Quintuple(
             StatusWarningYellowBg,
             StatusWarningYellow,
             StatusWarningYellow,
             Icons.Default.Warning,
-            "UNVERIFIED PACKAGING"
+            "UNVERIFIED"
         )
         VerificationStatus.RED -> Quintuple(
             StatusAlertRedBg,
             StatusAlertRed,
             StatusAlertRed,
             Icons.Default.Error,
-            "FRAUD / COUNTERFEIT ALERT"
+            "ALERT"
         )
     }
 
@@ -90,19 +84,19 @@ fun StatusBadge(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = label,
                 tint = textColor,
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(14.dp)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = label,
                 color = textColor,
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.5.sp
             )
@@ -123,47 +117,50 @@ fun VerificationStepCard(
 
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = SlateSurfaceVariant
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         border = androidx.compose.foundation.BorderStroke(
             width = 1.dp,
-            color = if (step.status == VerificationStatus.RED) StatusAlertRed.copy(alpha = 0.8f) else SlateBorder
+            color = if (step.status == VerificationStatus.RED) StatusAlertRed.copy(alpha = 0.7f) else MaterialTheme.colorScheme.outline
         ),
         modifier = modifier
             .fillMaxWidth()
             .testTag("step_card_${step.stepNumber}")
     ) {
         Column(
-            modifier = Modifier.padding(14.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f)
+                ) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(26.dp)
+                            .size(28.dp)
                             .clip(CircleShape)
-                            .background(statusColor.copy(alpha = 0.2f))
+                            .background(statusColor.copy(alpha = 0.15f))
                             .border(1.dp, statusColor, CircleShape)
                     ) {
                         Text(
                             text = "${step.stepNumber}",
                             color = statusColor,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Bold
                         )
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = step.title,
-                        color = Color.White,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 
@@ -173,9 +170,9 @@ fun VerificationStepCard(
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = step.details,
-                color = LightSlate,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
-                lineHeight = 18.sp
+                lineHeight = 19.sp
             )
 
             if (!step.flaggedIssue.isNullOrBlank()) {
@@ -199,9 +196,9 @@ fun VerificationStepCard(
                         Text(
                             text = step.flaggedIssue,
                             color = StatusAlertRed,
-                            fontSize = 12.sp,
+                            fontSize = 13.sp,
                             fontWeight = FontWeight.Medium,
-                            lineHeight = 16.sp
+                            lineHeight = 18.sp
                         )
                     }
                 }
@@ -219,21 +216,21 @@ fun IngredientCard(
         "PRO" -> Triple(StatusPassGreenBg, StatusPassGreen, "BENEFICIAL")
         "CON" -> Triple(StatusWarningYellowBg, StatusWarningYellow, "POTENTIAL IRRITANT")
         "TOXIC_ALERT" -> Triple(StatusAlertRedBg, StatusAlertRed, "TOXIC / BANNED")
-        else -> Triple(SlateSurfaceVariant, LightSlate, "NEUTRAL")
+        else -> Triple(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant, "NEUTRAL")
     }
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = SlateSurface),
-        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(14.dp),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            if (detail.isToxicBleach) StatusAlertRed else SlateBorder
+            if (detail.isToxicBleach) StatusAlertRed else MaterialTheme.colorScheme.outline
         ),
         modifier = modifier
             .fillMaxWidth()
             .testTag("ingredient_item_${detail.name.take(10)}")
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -241,7 +238,7 @@ fun IngredientCard(
             ) {
                 Text(
                     text = detail.name,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.weight(1f)
@@ -255,7 +252,7 @@ fun IngredientCard(
                     Text(
                         text = actionLabel,
                         color = actionText,
-                        fontSize = 10.sp,
+                        fontSize = 11.sp,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
@@ -266,9 +263,9 @@ fun IngredientCard(
 
             Text(
                 text = detail.explanation,
-                color = LightSlate,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 13.sp,
-                lineHeight = 18.sp
+                lineHeight = 19.sp
             )
 
             if (detail.comedogenicScore != null && detail.comedogenicScore > 0) {
@@ -278,92 +275,21 @@ fun IngredientCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "Comedogenic (Pore-Clogging) Index: ${detail.comedogenicScore}/5",
-                        color = if (detail.comedogenicScore >= 4) StatusAlertRed else LightSlate,
-                        fontSize = 11.sp,
+                        text = "Comedogenic Index: ${detail.comedogenicScore}/5",
+                        color = if (detail.comedogenicScore >= 4) StatusAlertRed else MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Medium
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                     LinearProgressIndicator(
                         progress = { detail.comedogenicScore / 5f },
                         color = if (detail.comedogenicScore >= 4) StatusAlertRed else if (detail.comedogenicScore >= 2) StatusWarningYellow else StatusPassGreen,
-                        trackColor = SlateBorder,
+                        trackColor = MaterialTheme.colorScheme.outline,
                         modifier = Modifier
                             .weight(1f)
                             .height(6.dp)
                             .clip(CircleShape)
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun QualityScoreMeter(
-    luminosity: Float,
-    sharpness: Float,
-    confidence: Float,
-    modifier: Modifier = Modifier
-) {
-    val isDark = luminosity < 0.35f
-    val isBlurry = sharpness < 0.45f
-
-    Card(
-        colors = CardDefaults.cardColors(containerColor = ObsidianBase.copy(alpha = 0.85f)),
-        shape = RoundedCornerShape(12.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, ElectricCyan.copy(alpha = 0.4f)),
-        modifier = modifier.testTag("quality_score_meter")
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = "FRAME QUALITY RADAR",
-                    color = ElectricCyan,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
-                )
-                Text(
-                    text = "${(confidence * 100).toInt()}% READY",
-                    color = if (confidence >= 0.85f) StatusPassGreen else StatusWarningYellow,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            LinearProgressIndicator(
-                progress = { confidence },
-                color = if (confidence >= 0.85f) StatusPassGreen else ElectricCyan,
-                trackColor = SlateBorder,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(CircleShape)
-            )
-
-            AnimatedVisibility(visible = isDark || isBlurry) {
-                Column(modifier = Modifier.padding(top = 6.dp)) {
-                    if (isDark) {
-                        Text(
-                            text = "⚠ Too Dark - Turn on Flashlight / Increase Lighting",
-                            color = StatusWarningYellow,
-                            fontSize = 11.sp
-                        )
-                    }
-                    if (isBlurry) {
-                        Text(
-                            text = "⚠ Image Blurry - Hold Device Steady over Packaging",
-                            color = StatusAlertRed,
-                            fontSize = 11.sp
-                        )
-                    }
                 }
             }
         }

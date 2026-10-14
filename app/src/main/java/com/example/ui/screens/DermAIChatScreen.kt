@@ -26,10 +26,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.MedicalServices
-import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -50,15 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.ChatMessage
 import com.example.model.SkinProfile
-import com.example.ui.theme.ElectricCyan
-import com.example.ui.theme.LightSlate
-import com.example.ui.theme.ObsidianBase
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateContainer
-import com.example.ui.theme.SlateSurface
-import com.example.ui.theme.SlateSurfaceVariant
-import com.example.ui.theme.StatusPassGreen
-import com.example.ui.theme.TealDark
+import com.example.ui.theme.KlarityGoldPrimary
+import com.example.ui.theme.RoyalBlue
+import com.example.ui.theme.SapphireBlue
 
 @Composable
 fun DermAIChatScreen(
@@ -75,11 +69,11 @@ fun DermAIChatScreen(
     val listState = rememberLazyListState()
 
     val suggestedQuestions = listOf(
-        "Is Hydroquinone banned in Nigeria?",
-        "Best routine for acne in Lagos humidity?",
-        "How do I spot cloned CeraVe or Nivea?",
-        "Non-comedogenic moisturizers for dark skin",
-        "Safe ingredients to fade dark marks (PIH)"
+        "Harmful Bleaching Red Flags",
+        "Acne in Humid Weather",
+        "Gentle Dark Spot (PIH) Ingredients",
+        "How to Verify Batch Syntax",
+        "Safe Sunscreens for Dark Skin"
     )
 
     LaunchedEffect(messages.size) {
@@ -91,7 +85,7 @@ fun DermAIChatScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ObsidianBase)
+            .background(MaterialTheme.colorScheme.background)
             .testTag("derm_ai_chat_screen")
     ) {
         // Top Toolbar
@@ -109,7 +103,7 @@ fun DermAIChatScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
 
@@ -119,68 +113,28 @@ fun DermAIChatScreen(
                         modifier = Modifier
                             .size(8.dp)
                             .clip(CircleShape)
-                            .background(StatusPassGreen)
+                            .background(KlarityGoldPrimary)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "KLARITY DERMAI",
-                        color = Color.White,
-                        fontSize = 14.sp,
+                        text = "DERMAI ADVISORY",
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 1.sp
                     )
                 }
                 Text(
-                    text = "Cosmetic Toxicologist & African Dermatology Expert",
-                    color = LightSlate,
-                    fontSize = 10.sp
+                    text = "Cosmetic Toxicology & Melanin Skin",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp
                 )
             }
 
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(SlateSurfaceVariant)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MedicalServices,
-                    contentDescription = null,
-                    tint = ElectricCyan,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            Box(modifier = Modifier.size(40.dp))
         }
 
-        // Active Profile Context Pill
-        Surface(
-            color = SlateSurfaceVariant,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-            shape = RoundedCornerShape(8.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "Active Profile: ",
-                    color = LightSlate,
-                    fontSize = 11.sp
-                )
-                Text(
-                    text = "${skinProfile.skinType.displayName} • ${skinProfile.climateZone.take(14)}...",
-                    color = ElectricCyan,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-
-        // Suggested Prompt Chips
+        // Suggested Topic Chips
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -188,35 +142,35 @@ fun DermAIChatScreen(
         ) {
             items(suggestedQuestions) { question ->
                 Surface(
-                    color = SlateSurface,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(16.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, TealDark.copy(alpha = 0.6f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                     modifier = Modifier
                         .clickable { onSendMessage(question) }
-                        .testTag("prompt_chip_${question.take(10)}")
+                        .testTag("suggested_chip_${question.take(10)}")
                 ) {
                     Text(
                         text = question,
-                        color = ElectricCyan,
-                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                     )
                 }
             }
         }
 
-        // Messages Thread
+        // Chat Message List
         LazyColumn(
             state = listState,
             contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
         ) {
-            items(messages) { message ->
-                val isUser = message.sender == "user"
+            items(messages) { msg ->
+                val isUser = msg.sender == "user"
                 Row(
                     horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
                     modifier = Modifier.fillMaxWidth()
@@ -225,68 +179,63 @@ fun DermAIChatScreen(
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(28.dp)
+                                .size(32.dp)
                                 .clip(CircleShape)
-                                .background(SlateContainer)
+                                .background(SapphireBlue.copy(alpha = 0.15f))
+                                .border(1.dp, SapphireBlue, CircleShape)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.SmartToy,
-                                contentDescription = "AI",
-                                tint = ElectricCyan,
+                                imageVector = Icons.Default.MedicalServices,
+                                contentDescription = null,
+                                tint = SapphireBlue,
                                 modifier = Modifier.size(16.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(8.dp))
                     }
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.85f)
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = 14.dp,
-                                    topEnd = 14.dp,
-                                    bottomStart = if (isUser) 14.dp else 2.dp,
-                                    bottomEnd = if (isUser) 2.dp else 14.dp
-                                )
-                            )
-                            .background(if (isUser) ElectricCyan else SlateSurfaceVariant)
-                            .border(
-                                1.dp,
-                                if (isUser) ElectricCyan else SlateBorder,
-                                RoundedCornerShape(
-                                    topStart = 14.dp,
-                                    topEnd = 14.dp,
-                                    bottomStart = if (isUser) 14.dp else 2.dp,
-                                    bottomEnd = if (isUser) 2.dp else 14.dp
-                                )
-                            )
-                            .padding(14.dp)
+                    Surface(
+                        color = if (isUser) SapphireBlue else MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 16.dp,
+                            bottomStart = if (isUser) 16.dp else 4.dp,
+                            bottomEnd = if (isUser) 4.dp else 16.dp
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(
+                            width = 1.dp,
+                            color = if (isUser) SapphireBlue else KlarityGoldPrimary.copy(alpha = 0.35f)
+                        ),
+                        modifier = Modifier.fillMaxWidth(0.85f)
                     ) {
-                        Text(
-                            text = message.text,
-                            color = if (isUser) ObsidianBase else Color.White,
-                            fontSize = 13.sp,
-                            lineHeight = 19.sp,
-                            fontWeight = if (isUser) FontWeight.SemiBold else FontWeight.Normal
-                        )
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(
+                                text = msg.text,
+                                color = if (isUser) Color.White else MaterialTheme.colorScheme.onSurface,
+                                fontSize = 14.sp,
+                                lineHeight = 21.sp
+                            )
+                        }
                     }
                 }
             }
 
             if (isLoading) {
                 item {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 40.dp)
+                    ) {
                         CircularProgressIndicator(
-                            color = ElectricCyan,
+                            color = KlarityGoldPrimary,
                             strokeWidth = 2.dp,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Text(
-                            text = "Klarity DermAI is formulating clinical guidance...",
-                            color = LightSlate,
-                            fontSize = 12.sp
+                            text = "Consulting toxicological knowledge base...",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp
                         )
                     }
                 }
@@ -295,8 +244,8 @@ fun DermAIChatScreen(
 
         // Input Field Bar
         Surface(
-            color = SlateSurface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder),
+            color = MaterialTheme.colorScheme.surface,
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -308,15 +257,20 @@ fun DermAIChatScreen(
                 OutlinedTextField(
                     value = inputText,
                     onValueChange = { inputText = it },
-                    placeholder = { Text("Ask about ingredients, acne, or counterfeits...", color = LightSlate, fontSize = 12.sp) },
+                    placeholder = {
+                        Text(
+                            text = "Ask about ingredients, dark spots, or formulas...",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = ElectricCyan,
-                        unfocusedBorderColor = SlateBorder,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        focusedBorderColor = SapphireBlue,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                     ),
-                    maxLines = 3,
-                    shape = RoundedCornerShape(20.dp),
+                    shape = RoundedCornerShape(24.dp),
                     modifier = Modifier
                         .weight(1f)
                         .testTag("chat_input_field")
@@ -327,21 +281,20 @@ fun DermAIChatScreen(
                 IconButton(
                     onClick = {
                         if (inputText.isNotBlank()) {
-                            val textToSend = inputText
+                            onSendMessage(inputText)
                             inputText = ""
-                            onSendMessage(textToSend)
                         }
                     },
                     modifier = Modifier
                         .size(44.dp)
                         .clip(CircleShape)
-                        .background(ElectricCyan)
+                        .background(if (inputText.isNotBlank()) KlarityGoldPrimary else MaterialTheme.colorScheme.surfaceVariant)
                         .testTag("chat_send_btn")
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "Send",
-                        tint = ObsidianBase,
+                        tint = if (inputText.isNotBlank()) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }

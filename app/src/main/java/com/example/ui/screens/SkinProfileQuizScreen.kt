@@ -29,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -48,14 +49,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.SkinProfile
 import com.example.model.SkinType
-import com.example.ui.theme.ElectricCyan
-import com.example.ui.theme.LightSlate
-import com.example.ui.theme.ObsidianBase
-import com.example.ui.theme.SlateBorder
-import com.example.ui.theme.SlateContainer
-import com.example.ui.theme.SlateSurface
-import com.example.ui.theme.SlateSurfaceVariant
-import com.example.ui.theme.StatusPassGreen
+import com.example.ui.theme.KlarityGoldPrimary
+import com.example.ui.theme.SapphireBlue
 
 @Composable
 fun SkinProfileQuizScreen(
@@ -81,7 +76,7 @@ fun SkinProfileQuizScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ObsidianBase)
+            .background(MaterialTheme.colorScheme.background)
             .testTag("skin_profile_quiz_screen")
     ) {
         // Top Toolbar
@@ -99,14 +94,14 @@ fun SkinProfileQuizScreen(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
-                    tint = Color.White
+                    tint = MaterialTheme.colorScheme.onBackground
                 )
             }
 
             Text(
-                text = "SKIN INTELLIGENCE PROFILE",
-                color = Color.White,
-                fontSize = 14.sp,
+                text = "SKIN PROFILE & INTELLIGENCE",
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
@@ -123,34 +118,34 @@ fun SkinProfileQuizScreen(
         ) {
             // Intro Banner
             Card(
-                colors = CardDefaults.cardColors(containerColor = SlateSurfaceVariant),
-                shape = RoundedCornerShape(14.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, ElectricCyan.copy(alpha = 0.5f)),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, KlarityGoldPrimary.copy(alpha = 0.5f)),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
-                            .background(ElectricCyan.copy(alpha = 0.2f))
+                            .background(KlarityGoldPrimary.copy(alpha = 0.15f))
                     ) {
-                        Icon(imageVector = Icons.Default.Face, contentDescription = null, tint = ElectricCyan)
+                        Icon(imageVector = Icons.Default.Face, contentDescription = null, tint = KlarityGoldPrimary)
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(14.dp))
                     Column {
                         Text(
                             text = "Personalized Ingredient Profiler",
-                            color = Color.White,
-                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = 15.sp,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Calibrates Klarity's AI cosmetic dermatologist to flag pore-clogging comedogenic ingredients, allergens, and tropical climate irritants.",
-                            color = LightSlate,
-                            fontSize = 12.sp,
-                            lineHeight = 16.sp
+                            text = "Tailors Klarity's cosmetic evaluation to flag comedogenic oils, allergens, and tropical climate irritants for your skin.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp
                         )
                     }
                 }
@@ -159,20 +154,20 @@ fun SkinProfileQuizScreen(
             // 1. Primary Skin Type
             Text(
                 text = "1. SELECT PRIMARY SKIN TYPE",
-                color = ElectricCyan,
-                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                letterSpacing = 0.5.sp
             )
 
             SkinType.entries.forEach { type ->
                 val isSelected = selectedType == type
                 Surface(
-                    color = if (isSelected) SlateContainer else SlateSurface,
+                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(12.dp),
                     border = androidx.compose.foundation.BorderStroke(
                         width = if (isSelected) 1.5.dp else 1.dp,
-                        color = if (isSelected) ElectricCyan else SlateBorder
+                        color = if (isSelected) KlarityGoldPrimary else MaterialTheme.colorScheme.outline
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -181,39 +176,40 @@ fun SkinProfileQuizScreen(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(14.dp)
+                        modifier = Modifier.padding(16.dp)
                     ) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(22.dp)
+                                .size(24.dp)
                                 .clip(CircleShape)
-                                .background(if (isSelected) ElectricCyan else Color.Transparent)
-                                .border(1.dp, if (isSelected) ElectricCyan else LightSlate, CircleShape)
+                                .background(if (isSelected) KlarityGoldPrimary else Color.Transparent)
+                                .border(1.dp, if (isSelected) KlarityGoldPrimary else MaterialTheme.colorScheme.outline, CircleShape)
                         ) {
                             if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = null,
-                                    tint = ObsidianBase,
-                                    modifier = Modifier.size(14.dp)
+                                    tint = Color.White,
+                                    modifier = Modifier.size(16.dp)
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(12.dp))
+                        Spacer(modifier = Modifier.width(14.dp))
 
                         Column {
                             Text(
                                 text = type.displayName,
-                                color = Color.White,
-                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 15.sp,
                                 fontWeight = FontWeight.Bold
                             )
+                            Spacer(modifier = Modifier.height(2.dp))
                             Text(
                                 text = type.description,
-                                color = LightSlate,
-                                fontSize = 12.sp
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontSize = 13.sp
                             )
                         }
                     }
@@ -223,34 +219,34 @@ fun SkinProfileQuizScreen(
             // 2. Specific Target Concerns
             Text(
                 text = "2. KEY DERMATOLOGICAL CONCERNS",
-                color = ElectricCyan,
-                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                letterSpacing = 0.5.sp
             )
 
             Card(
-                colors = CardDefaults.cardColors(containerColor = SlateSurface),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 shape = RoundedCornerShape(14.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, SlateBorder),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Acne-Prone & Pore Congestion", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                            Text("Flags heavy comedogenic esters (scores 3-5)", color = LightSlate, fontSize = 11.sp)
+                            Text("Acne-Prone & Pore Congestion", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("Flags heavy comedogenic ingredients (scores 3-5)", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                         }
                         Switch(
                             checked = isAcneProne,
                             onCheckedChange = { isAcneProne = it },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = ObsidianBase,
-                                checkedTrackColor = ElectricCyan
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = KlarityGoldPrimary
                             )
                         )
                     }
@@ -261,15 +257,15 @@ fun SkinProfileQuizScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Melanin Hyperpigmentation / PIH", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                            Text("Highlights safe dark-spot faders & tyrosinase inhibitors", color = LightSlate, fontSize = 11.sp)
+                            Text("Melanin Hyperpigmentation / PIH", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("Highlights safe dark-spot faders & tyrosinase inhibitors", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                         }
                         Switch(
                             checked = hasHyperpigmentation,
                             onCheckedChange = { hasHyperpigmentation = it },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = ObsidianBase,
-                                checkedTrackColor = ElectricCyan
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = KlarityGoldPrimary
                             )
                         )
                     }
@@ -280,15 +276,15 @@ fun SkinProfileQuizScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Sensitive & Reactive Skin", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-                            Text("Flags artificial fragrance, harsh alcohols, and allergens", color = LightSlate, fontSize = 11.sp)
+                            Text("Sensitive & Reactive Skin", color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            Text("Flags synthetic fragrance, drying alcohols, and common allergens", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                         }
                         Switch(
                             checked = isSensitive,
                             onCheckedChange = { isSensitive = it },
                             colors = SwitchDefaults.colors(
-                                checkedThumbColor = ObsidianBase,
-                                checkedTrackColor = ElectricCyan
+                                checkedThumbColor = Color.White,
+                                checkedTrackColor = KlarityGoldPrimary
                             )
                         )
                     }
@@ -298,20 +294,20 @@ fun SkinProfileQuizScreen(
             // 3. Climate Zone
             Text(
                 text = "3. REGIONAL CLIMATE CONTEXT",
-                color = ElectricCyan,
-                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onBackground,
+                fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
+                letterSpacing = 0.5.sp
             )
 
             climates.forEach { climate ->
                 val isSelected = selectedClimate == climate
                 Surface(
-                    color = if (isSelected) SlateContainer else SlateSurface,
-                    shape = RoundedCornerShape(10.dp),
+                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                    shape = RoundedCornerShape(12.dp),
                     border = androidx.compose.foundation.BorderStroke(
                         width = if (isSelected) 1.5.dp else 1.dp,
-                        color = if (isSelected) ElectricCyan else SlateBorder
+                        color = if (isSelected) KlarityGoldPrimary else MaterialTheme.colorScheme.outline
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -319,27 +315,27 @@ fun SkinProfileQuizScreen(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(12.dp)
+                        modifier = Modifier.padding(14.dp)
                     ) {
                         Box(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier
-                                .size(18.dp)
+                                .size(20.dp)
                                 .clip(CircleShape)
-                                .background(if (isSelected) ElectricCyan else Color.Transparent)
-                                .border(1.dp, if (isSelected) ElectricCyan else LightSlate, CircleShape)
+                                .background(if (isSelected) KlarityGoldPrimary else Color.Transparent)
+                                .border(1.dp, if (isSelected) KlarityGoldPrimary else MaterialTheme.colorScheme.outline, CircleShape)
                         ) {
                             if (isSelected) {
-                                Icon(Icons.Default.Check, contentDescription = null, tint = ObsidianBase, modifier = Modifier.size(12.dp))
+                                Icon(Icons.Default.Check, contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
                             }
                         }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(text = climate, color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(text = climate, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Save CTA
             Button(
@@ -356,10 +352,10 @@ fun SkinProfileQuizScreen(
                     onBack()
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = ElectricCyan,
-                    contentColor = ObsidianBase
+                    containerColor = KlarityGoldPrimary,
+                    contentColor = Color.White
                 ),
-                shape = RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(12.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
@@ -368,8 +364,7 @@ fun SkinProfileQuizScreen(
                 Text(
                     text = "SAVE SKIN PROFILE",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 13.sp,
-                    letterSpacing = 1.sp
+                    fontSize = 14.sp
                 )
             }
 

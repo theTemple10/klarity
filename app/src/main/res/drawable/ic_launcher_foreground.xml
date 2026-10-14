@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:width="66dp"
-        android:height="66dp"
-        android:drawable="@drawable/ic_klarity_fun_logo_1791978487683"
-        android:gravity="center" />
+        android:width="72dp"
+        android:height="72dp"
+        android:gravity="center"
+        android:drawable="@drawable/klarity_matured_logo_1791988657383" />
 </layer-list>
