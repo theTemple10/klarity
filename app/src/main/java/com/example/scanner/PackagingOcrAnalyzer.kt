@@ -131,6 +131,8 @@ object PackagingOcrAnalyzer {
         private val onBarcodeDetected: (String) -> Unit
     ) : ImageAnalysis.Analyzer {
 
+        private var lastDetectedTime = 0L
+
         @OptIn(ExperimentalGetImage::class)
         override fun analyze(imageProxy: ImageProxy) {
             val mediaImage = imageProxy.image
@@ -138,11 +140,26 @@ object PackagingOcrAnalyzer {
                 val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
                 barcodeScanner.process(image)
                     .addOnSuccessListener { barcodes ->
-                        for (barcode in barcodes) {
-                            val raw = barcode.rawValue ?: continue
-                            if (GtinValidator.isValid(raw)) {
-                                onBarcodeDetected(raw)
-                                break
+                        val now = System.currentTimeMillis()
+                        if (now - lastDetectedTime > 1000) { // 1 sec debounce
+                            for (barcode in barcodes) {
+                                val raw = barcode.rawValue ?: continue
+                                if (barcode.format == Barcode.FORMAT_DATA_MATRIX || barcode.format == Barcode.FORMAT_QR_CODE) {
+                                    val gs1 = Gs1Parser.parse(raw)
+                                    val candidate = gs1.gtin ?: raw
+                                    if (GtinValidator.isValid(candidate) || (candidate.length in 8..14 && candidate.all { it.isDigit() })) {
+                                        lastDetectedTime = now
+                                        onBarcodeDetected(candidate)
+                                        break
+                                    }
+                                } else {
+                                    val digits = raw.filter { it.isDigit() }
+                                    if (GtinValidator.isValid(digits) || (digits.length in 8..14)) {
+                                        lastDetectedTime = now
+                                        onBarcodeDetected(digits)
+                                        break
+                                    }
+                                }
                             }
                         }
                     }

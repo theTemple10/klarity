@@ -2,15 +2,16 @@ package com.example.scanner
 
 object NafdacParser {
 
-    private val nafdacRegex = Regex("""\b([A-Za-z]?\d{1,2})\s*[-–]\s*(\d{3,5}[A-Za-z]?)\b""")
-    private val standaloneReg = Regex("""(?i)\b(?:NAFDAC|REG(?:\.|\s*NO)?)\s*[:.]?\s*([A-Za-z0-9\-–\s]{4,12})""")
+    // Matches e.g. A2-101409, 02-1988, A4-2281, B4-1102, 04-123456, A2/101409, A2 101409
+    private val nafdacRegex = Regex("""\b([A-Za-z0-9]{1,4})\s*[-–/]\s*([A-Za-z0-9]{3,8})\b""")
+    private val standaloneReg = Regex("""(?i)\b(?:NAFDAC|REG(?:\.|\s*NO)?|N\.R\.N)\s*[:.]?\s*([A-Za-z0-9\-–/\s]{4,14})""")
 
     fun parse(text: String): String? {
         val lines = text.lines()
 
-        // 1. First look on lines containing NAFDAC keyword
+        // 1. First look on lines containing NAFDAC or REG keyword
         for (line in lines) {
-            if (line.contains("NAFDAC", ignoreCase = true)) {
+            if (line.contains("NAFDAC", ignoreCase = true) || line.contains("REG NO", ignoreCase = true)) {
                 val match = nafdacRegex.find(line)
                 if (match != null) {
                     val part1 = match.groupValues[1].uppercase()
@@ -19,8 +20,8 @@ object NafdacParser {
                 }
                 val stand = standaloneReg.find(line)
                 if (stand != null) {
-                    val candidate = stand.groupValues[1].trim().replace(" ", "").uppercase()
-                    if (candidate.length in 5..10 && candidate.contains("-")) {
+                    val candidate = stand.groupValues[1].trim().replace(" ", "").replace("/", "-").uppercase()
+                    if (candidate.length in 5..14 && candidate.contains("-")) {
                         return candidate
                     }
                 }

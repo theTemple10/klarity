@@ -14,6 +14,12 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE barcodeGtin = :barcode LIMIT 1")
     suspend fun getProductByBarcode(barcode: String): ProductEntity?
 
+    @Query("SELECT * FROM products WHERE REPLACE(REPLACE(UPPER(nafdacNumber), '-', ''), ' ', '') = REPLACE(REPLACE(UPPER(:nafdac), '-', ''), ' ', '') LIMIT 1")
+    suspend fun getProductByNafdac(nafdac: String): ProductEntity?
+
+    @Query("SELECT * FROM products WHERE barcodeGtin = :barcode OR REPLACE(REPLACE(UPPER(nafdacNumber), '-', ''), ' ', '') = REPLACE(REPLACE(UPPER(:nafdac), '-', ''), ' ', '') LIMIT 1")
+    suspend fun getProductByBarcodeOrNafdac(barcode: String, nafdac: String): ProductEntity?
+
     @Query("SELECT * FROM products WHERE brandName LIKE '%' || :query || '%' OR productName LIKE '%' || :query || '%'")
     suspend fun searchProducts(query: String): List<ProductEntity>
 

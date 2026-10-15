@@ -47,6 +47,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import android.graphics.BitmapFactory
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -57,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,6 +73,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.scanner.PackagingOcrAnalyzer
 import com.example.ui.PresetScenario
 import com.example.ui.components.CameraViewfinder
 import com.example.ui.components.NigerianLocationSelector
@@ -77,6 +81,9 @@ import com.example.ui.theme.KlarityGoldPrimary
 import com.example.ui.theme.SapphireBlue
 import com.example.ui.theme.StatusAlertRed
 import com.example.ui.theme.StatusPassGreen
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun ScannerScreen(
@@ -88,6 +95,7 @@ fun ScannerScreen(
 ) {
     BackHandler { onBack() }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     var selectedTab by remember { mutableIntStateOf(0) } // 0: Barcode/Batch, 1: Ingredient INCI, 2: Manual Input
     var isFlashOn by remember { mutableStateOf(false) }
@@ -117,6 +125,8 @@ fun ScannerScreen(
     // Captured image state
     var capturedPhotoBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var showCapturedSuccessBanner by remember { mutableStateOf(false) }
+    var isExtractingFromImage by remember { mutableStateOf(false) }
+    var extractionSummary by remember { mutableStateOf<String?>(null) }
 
     // State & Landmark Selection (supports all 36 States + FCT and customizable landmark)
     var selectedState by remember { mutableStateOf("Lagos") }
@@ -124,14 +134,55 @@ fun ScannerScreen(
 
     val fullLocationString = if (selectedLandmark.isNotBlank()) "$selectedState ($selectedLandmark)" else selectedState
 
-    // Zero-permission Photo Picker
+    // Zero-permission Photo Picker with automated OCR pipeline
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri != null) {
             showCapturedSuccessBanner = true
             validationError = null
-            // If user hasn't typed anything yet, guide them to enter or select values
+            coroutineScope.launch {
+                isExtractingFromImage = true
+                try {
+                    val bitmap = withContext(Dispatchers.IO) {
+                        context.contentResolver.openInputStream(uri)?.use { stream ->
+                            BitmapFactory.decodeStream(stream)
+                        }
+                    }
+                    if (bitmap != null) {
+                        capturedPhotoBitmap = bitmap
+                        val result = withContext(Dispatchers.Default) {
+                            PackagingOcrAnalyzer.analyzeBitmap(bitmap)
+                        }
+                        val found = mutableListOf<String>()
+                        result.gtin?.value?.let {
+                            barcodeInput = it
+                            found.add("Barcode: $it")
+                        }
+                        result.nafdacNo?.value?.let {
+                            nafdacInput = it
+                            found.add("NAFDAC: $it")
+                        }
+                        result.batchCode?.value?.let {
+                            batchInput = it
+                            found.add("Batch: $it")
+                        }
+                        if (result.ingredients.isNotEmpty()) {
+                            ingredientInput = result.ingredients.joinToString(", ")
+                            found.add("${result.ingredients.size} ingredients")
+                        }
+                        if (found.isNotEmpty()) {
+                            extractionSummary = "Extracted from photo: ${found.joinToString(" • ")}"
+                        } else {
+                            extractionSummary = "Photo uploaded. Enter any missing identifiers below."
+                        }
+                    }
+                } catch (_: Exception) {
+                    extractionSummary = "Photo uploaded. Ready to verify."
+                } finally {
+                    isExtractingFromImage = false
+                }
+            }
         }
     }
 
@@ -242,13 +293,55 @@ fun ScannerScreen(
                             isFlashOn = isFlashOn,
                             onToggleFlash = { isFlashOn = !isFlashOn },
                             guidanceText = if (selectedTab == 0)
-                                "Center barcode or batch stamp • Tap shutter to capture"
+                                "Center barcode or batch stamp • Live auto-scan or tap shutter"
                             else
                                 "Center cosmetic ingredient list • Tap shutter to capture",
+                            onBarcodeDetected = { detectedBarcode ->
+                                if (barcodeInput != detectedBarcode) {
+                                    barcodeInput = detectedBarcode
+                                    extractionSummary = "Live Barcode Auto-Detected: $detectedBarcode"
+                                    showCapturedSuccessBanner = true
+                                    validationError = null
+                                }
+                            },
                             onImageCaptured = { bitmap ->
                                 capturedPhotoBitmap = bitmap
                                 showCapturedSuccessBanner = true
                                 validationError = null
+                                coroutineScope.launch {
+                                    isExtractingFromImage = true
+                                    try {
+                                        val result = withContext(Dispatchers.Default) {
+                                            PackagingOcrAnalyzer.analyzeBitmap(bitmap)
+                                        }
+                                        val found = mutableListOf<String>()
+                                        result.gtin?.value?.let {
+                                            barcodeInput = it
+                                            found.add("Barcode: $it")
+                                        }
+                                        result.nafdacNo?.value?.let {
+                                            nafdacInput = it
+                                            found.add("NAFDAC: $it")
+                                        }
+                                        result.batchCode?.value?.let {
+                                            batchInput = it
+                                            found.add("Batch: $it")
+                                        }
+                                        if (result.ingredients.isNotEmpty()) {
+                                            ingredientInput = result.ingredients.joinToString(", ")
+                                            found.add("${result.ingredients.size} ingredients")
+                                        }
+                                        if (found.isNotEmpty()) {
+                                            extractionSummary = "Extracted from photo: ${found.joinToString(" • ")}"
+                                        } else {
+                                            extractionSummary = "Photo processed. No barcode or NAFDAC detected. Enter values manually below."
+                                        }
+                                    } catch (e: Exception) {
+                                        extractionSummary = "Captured photo ready. Verify or refine values below."
+                                    } finally {
+                                        isExtractingFromImage = false
+                                    }
+                                }
                             },
                             modifier = Modifier.fillMaxSize()
                         )
@@ -313,7 +406,7 @@ fun ScannerScreen(
                     }
                 }
 
-                // Photo Captured Success Pill / Thumbnail
+                // Photo Captured Success Pill / Thumbnail & Extraction Progress
                 AnimatedVisibility(visible = showCapturedSuccessBanner) {
                     Surface(
                         color = StatusPassGreen.copy(alpha = 0.12f),
@@ -330,7 +423,14 @@ fun ScannerScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.weight(1f)
                             ) {
-                                if (capturedPhotoBitmap != null) {
+                                if (isExtractingFromImage) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(28.dp),
+                                        strokeWidth = 2.5.dp,
+                                        color = KlarityGoldPrimary
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                } else if (capturedPhotoBitmap != null) {
                                     Image(
                                         bitmap = capturedPhotoBitmap!!.asImageBitmap(),
                                         contentDescription = "Captured Packaging",
@@ -351,15 +451,16 @@ fun ScannerScreen(
 
                                 Column {
                                     Text(
-                                        text = "Packaging Photo Captured",
+                                        text = if (isExtractingFromImage) "Analyzing Packaging OCR..." else "Packaging Photo Processed",
                                         color = MaterialTheme.colorScheme.onSurface,
                                         fontSize = 13.sp,
                                         fontWeight = FontWeight.Bold
                                     )
                                     Text(
-                                        text = "Identifiers ready. Verify or refine values below.",
+                                        text = extractionSummary ?: "Identifiers extracted. Verify or adjust values below.",
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 11.sp
+                                        fontSize = 11.sp,
+                                        lineHeight = 15.sp
                                     )
                                 }
                             }
@@ -406,8 +507,8 @@ fun ScannerScreen(
                     Button(
                         onClick = {
                             if (selectedTab == 0) {
-                                if (barcodeInput.isBlank() && batchInput.isBlank()) {
-                                    validationError = "Please capture packaging with camera, upload photo, or enter Barcode / Batch Code below to verify."
+                                if (barcodeInput.isBlank() && nafdacInput.isBlank() && batchInput.isBlank()) {
+                                    validationError = "Please capture packaging with camera, upload photo, or enter Barcode / NAFDAC Reg No below to verify."
                                 } else {
                                     validationError = null
                                     onVerify(barcodeInput, nafdacInput, batchInput, fullLocationString)
@@ -631,8 +732,8 @@ fun ScannerScreen(
 
                         Button(
                             onClick = {
-                                if (barcodeInput.isBlank() && batchInput.isBlank()) {
-                                    validationError = "Please enter at least a Barcode or Batch Code to run verification."
+                                if (barcodeInput.isBlank() && nafdacInput.isBlank() && batchInput.isBlank()) {
+                                    validationError = "Please enter at least a Barcode or NAFDAC Reg No to run verification."
                                 } else {
                                     validationError = null
                                     onVerify(barcodeInput, nafdacInput, batchInput, fullLocationString)
@@ -679,6 +780,16 @@ fun ScannerScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SamplePackagingRow(
+                            label = "Nivea Radiant & Beauty Adv. Care (4005900925022 / A2-101409)",
+                            statusColor = StatusPassGreen,
+                            onClick = {
+                                barcodeInput = "4005900925022"
+                                nafdacInput = "A2-101409"
+                                batchInput = "24189021"
+                                validationError = null
+                            }
+                        )
                         SamplePackagingRow(
                             label = "Authentic Nivea Lotion (Pass)",
                             statusColor = StatusPassGreen,

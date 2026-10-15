@@ -71,6 +71,10 @@ import com.example.ui.theme.NavySurface
 import com.example.ui.theme.SapphireBlue
 import java.nio.ByteBuffer
 
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.UseCase
+import com.example.scanner.PackagingOcrAnalyzer
+
 @Composable
 fun CameraViewfinder(
     isFlashOn: Boolean,
@@ -78,6 +82,7 @@ fun CameraViewfinder(
     modifier: Modifier = Modifier,
     guidanceText: String = "Align barcode or batch code within gold frame",
     onCameraReady: () -> Unit = {},
+    onBarcodeDetected: ((String) -> Unit)? = null,
     onImageCaptured: (Bitmap) -> Unit = {},
     onError: (String) -> Unit = {}
 ) {
@@ -87,6 +92,7 @@ fun CameraViewfinder(
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var cameraInitFailed by remember { mutableStateOf(false) }
     var isCapturing by remember { mutableStateOf(false) }
+    var recentLiveBarcode by remember { mutableStateOf<String?>(null) }
 
     // Laser scanning animation inside reticle
     val infiniteTransition = rememberInfiniteTransition(label = "laser_scan")
@@ -143,13 +149,28 @@ fun CameraViewfinder(
                                 .build()
                             imageCapture = capture
 
+                            val useCases = mutableListOf<UseCase>(preview, capture)
+
+                            if (onBarcodeDetected != null) {
+                                val analysis = ImageAnalysis.Builder()
+                                    .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                                    .build()
+                                analysis.setAnalyzer(
+                                    ContextCompat.getMainExecutor(ctx),
+                                    PackagingOcrAnalyzer.LiveBarcodeAnalyzer { barcode ->
+                                        recentLiveBarcode = barcode
+                                        onBarcodeDetected(barcode)
+                                    }
+                                )
+                                useCases.add(analysis)
+                            }
+
                             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
                             cameraProvider.unbindAll()
                             camera = cameraProvider.bindToLifecycle(
                                 lifecycleOwner,
                                 cameraSelector,
-                                preview,
-                                capture
+                                *useCases.toTypedArray()
                             )
                             onCameraReady()
                         } catch (exc: Exception) {
@@ -234,20 +255,40 @@ fun CameraViewfinder(
         // =========================================================================
         // Guided Reticle Frame with Animated Scan Laser
         // =========================================================================
+        val reticleBorderColor = if (recentLiveBarcode != null) Color(0xFF4CAF50) else KlarityGoldPrimary.copy(alpha = 0.85f)
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
                 .size(240.dp, 140.dp)
-                .border(2.dp, KlarityGoldPrimary.copy(alpha = 0.85f), RoundedCornerShape(12.dp))
+                .border(2.dp, reticleBorderColor, RoundedCornerShape(12.dp))
         ) {
             // Laser beam animation inside reticle
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val y = size.height * laserY
                 drawLine(
-                    color = KlarityGoldPrimary.copy(alpha = 0.9f),
+                    color = reticleBorderColor,
                     start = Offset(0f, y),
                     end = Offset(size.width, y),
                     strokeWidth = 2.dp.toPx()
+                )
+            }
+        }
+
+        if (recentLiveBarcode != null) {
+            Surface(
+                color = Color(0xFF1B5E20).copy(alpha = 0.90f),
+                shape = RoundedCornerShape(12.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF4CAF50)),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(top = 160.dp)
+            ) {
+                Text(
+                    text = "✓ Barcode Detected: $recentLiveBarcode",
+                    color = Color.White,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
         }

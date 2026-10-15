@@ -13,7 +13,7 @@ import org.json.JSONArray
 
 @Database(
     entities = [ProductEntity::class, ScanLogEntity::class, CounterfeitReportEntity::class, UserProfileEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -34,6 +34,7 @@ abstract class KlarityDatabase : RoomDatabase() {
                     KlarityDatabase::class.java,
                     "klarity_database"
                 )
+                    .fallbackToDestructiveMigration()
                     .addCallback(KlarityDatabaseCallback(scope))
                     .build()
                 INSTANCE = instance
@@ -54,6 +55,18 @@ abstract class KlarityDatabase : RoomDatabase() {
             }
         }
 
+        override fun onOpen(db: SupportSQLiteDatabase) {
+            super.onOpen(db)
+            INSTANCE?.let { database ->
+                scope.launch(Dispatchers.IO) {
+                    val sample = database.productDao().getProductByBarcode("4005900925022")
+                    if (sample == null) {
+                        populateInitialData(database.productDao(), database.scanLogDao(), database.userProfileDao())
+                    }
+                }
+            }
+        }
+
         suspend fun populateInitialData(
             productDao: ProductDao,
             scanLogDao: ScanLogDao,
@@ -62,13 +75,31 @@ abstract class KlarityDatabase : RoomDatabase() {
             // Seed Authentic Cosmetics Ledger (Global & Nigerian Local Brands)
             val initialProducts = listOf(
                 ProductEntity(
+                    id = "prod_nivea_radiant_advanced_care",
+                    barcodeGtin = "4005900925022",
+                    brandName = "Nivea",
+                    productName = "Radiant & Beauty Advanced Care Body Lotion (400ml)",
+                    isLocalBrand = false,
+                    nafdacNumber = "A2-101409",
+                    batchRegex = "^[0-9A-Za-z]{6,12}$",
+                    ingredients = JSONArray(listOf(
+                        "Aqua", "Glycerin", "Paraffinum Liquidum", "Cetearyl Alcohol",
+                        "Glyceryl Stearate", "Macadamia Integrifolia Seed Oil",
+                        "Olea Europaea Fruit Oil", "Persea Gratissima (Avocado) Oil",
+                        "Prunus Amygdalus Dulcis Oil", "Niacinamide", "Tocopheryl Acetate",
+                        "Dimethicone", "Ethylhexylglycerin"
+                    )).toString(),
+                    category = "Body Care & Deep Moisture",
+                    description = "Formulated with 5 natural oils (Avocado, Macadamia, Olive, Almond, Soybean) plus Niacinamide for 48h radiant moisture. Certified authentic NAFDAC entry (Reg No: A2-101409)."
+                ),
+                ProductEntity(
                     id = "prod_nivea_even_glow",
                     barcodeGtin = "4005900940567",
                     brandName = "Nivea",
                     productName = "Radiant & Beauty Even Glow Body Lotion",
                     isLocalBrand = false,
                     nafdacNumber = "A2-4412",
-                    batchRegex = "^[0-9]{8}$",
+                    batchRegex = "^[0-9A-Za-z]{6,12}$",
                     ingredients = JSONArray(listOf(
                         "Aqua", "Glycerin", "Paraffinum Liquidum", "Cetearyl Alcohol",
                         "Glyceryl Stearate", "Niacinamide", "Pearl Extract",
