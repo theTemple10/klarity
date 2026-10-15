@@ -3,54 +3,45 @@ package com.example.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // =========================================================================
-// Klarity Gold, Sapphire Blue & Crisp White Palette (Refined & Minimalist)
+// Klarity Gold, Sapphire Blue & Crisp Neutral Palette (Honest M3 Design)
 // =========================================================================
 
-// --- Gold Shades ---
-val KlarityGoldPrimary = Color(0xFFD4AF37)   // Elegant metallic royal gold
-val KlarityGoldLight = Color(0xFFF3C75A)     // Luminous gold accent
-val KlarityGoldDark = Color(0xFFA68018)      // Antique deep gold
-val KlarityGoldGlow = Color(0xFFFFF7E6)      // Warm champagne gold wash
-val KlarityGoldBorder = Color(0x40D4AF37)    // Subtle frosted gold border
+// --- Accent: Royal Gold ---
+val KlarityGoldPrimary = Color(0xFFD4AF37)
+val KlarityOnGold = Color(0xFF14110A)             // Near-black for 10:1 contrast on gold
+val KlarityGoldTextLight = Color(0xFF8A6A0A)       // 5.1:1 on white for text
 
-// --- Blue Shades ---
-val RoyalBlue = Color(0xFF1E3A8A)           // Deep prestigious royal navy
-val SapphireBlue = Color(0xFF2563EB)        // High-contrast sapphire blue
-val SkyBlueAccent = Color(0xFF38BDF8)       // Vivid cerulean accent
-val NavyDeep = Color(0xFF090E1D)            // Clean obsidian midnight navy (Dark Mode scaffold)
-val NavySurface = Color(0xFF0F1A30)         // Minimalist slate navy card (Dark Mode)
-val NavySurfaceVariant = Color(0xFF162544)  // Elevated container (Dark Mode)
-val NavyBorder = Color(0x3338BDF8)          // Glassmorphic border
-val SoftBlueLight = Color(0xFFF1F5FD)       // Light theme card surface
-val IceBlueTint = Color(0xFFE2ECFA)         // Light theme secondary container
+// --- Dark Surfaces & Neutrals ---
+val DarkBackground = Color(0xFF0A1020)
+val DarkSurface = Color(0xFF121C33)
+val DarkSurfaceVariant = Color(0xFF1A2745)
+val DarkOutline = Color(0xFF2A3A5C)
+val DarkOnBackground = Color(0xFFF5F7FB)
+val DarkOnSurfaceVariant = Color(0xFFA9B4C8)
+val DarkLink = Color(0xFF6E9BFF)
 
-// --- White & Neutrals ---
-val PureWhite = Color(0xFFFFFFFF)
-val OffWhite = Color(0xFFF8FAFC)            // Crisp clean white (Light Mode scaffold)
-val SlateLight = Color(0xFF94A3B8)          // Secondary muted text (Dark Mode)
-val SlateDark = Color(0xFF334155)           // Secondary text (Light Mode)
-val MidnightBlue = Color(0xFF0B132B)        // Deep navy primary text (Light Mode)
-val SlateNavySubtle = Color(0xFFE2E8F0)     // Divider/border for Light Mode
+// --- Light Surfaces & Neutrals ---
+val LightBackground = Color(0xFFF7F8FB)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceVariant = Color(0xFFEEF1F7)
+val LightOutline = Color(0xFFE3E7EF)
+val LightOnBackground = Color(0xFF0B132B)
+val LightOnSurfaceVariant = Color(0xFF4A5568)
+val LightLink = Color(0xFF1E3A8A)
 
-// --- System Status Colors ---
+// --- Verdict Status Colors (Used only for check results) ---
 val StatusPassGreen = Color(0xFF10B981)
 val StatusPassGreenBg = Color(0x1F10B981)
-val StatusWarningGold = Color(0xFFF59E0B)
-val StatusWarningGoldBg = Color(0x1FF59E0B)
-val StatusAlertRed = Color(0xFFEF4444)
-val StatusAlertRedBg = Color(0x1FEF4444)
+val StatusWarningAmber = Color(0xFFF59E0B)
+val StatusWarningAmberBg = Color(0x1FF59E0B)
+val StatusFailRed = Color(0xFFEF4444)
+val StatusFailRedBg = Color(0x1FEF4444)
 
-// Compatibility aliases mapped to clean Gold & Blue palette
-val ElectricCyan = KlarityGoldLight
-val TealDark = SapphireBlue
-val LightSlate = SlateLight
-val ObsidianBase = NavyDeep
-val SlateSurface = NavySurface
-val SlateSurfaceVariant = NavySurfaceVariant
-val SlateContainer = NavySurfaceVariant
-val SlateBorder = NavyBorder
-val StatusWarningYellow = StatusWarningGold
-val StatusWarningYellowBg = StatusWarningGoldBg
-val ToxicPurple = Color(0xFF8B5CF6)
-val AmberShield = KlarityGoldPrimary
-val ClinicalBlue = SapphireBlue
+// --- Backward-compatibility aliases for UI screens ---
+val SapphireBlue = Color(0xFF1E3A8A)
+val RoyalBlue = Color(0xFF1E3A8A)
+val NavySurface = Color(0xFF121C33)
+val StatusAlertRed = StatusFailRed
+val StatusAlertRedBg = StatusFailRedBg
+val StatusWarningYellow = StatusWarningAmber
+val StatusWarningYellowBg = StatusWarningAmberBg

@@ -187,25 +187,17 @@ class KlarityViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun sendDermAiMessage(text: String) {
+    fun sendDermAiMessage(text: String, productContext: String? = null) {
         if (text.isBlank()) return
         val userMsg = ChatMessage(sender = "user", text = text)
         _chatMessages.value = _chatMessages.value + userMsg
 
         viewModelScope.launch {
             _isChatLoading.value = true
-            val reply = dermAiRepo.sendMessage(text, _skinProfile.value)
+            val reply = dermAiRepo.sendMessage(text, _skinProfile.value, _chatMessages.value, productContext)
             _chatMessages.value = _chatMessages.value + reply
             _isChatLoading.value = false
         }
-    }
-
-    fun setGeminiApiKey(key: String) {
-        dermAiRepo.setCustomApiKey(key)
-    }
-
-    fun getEffectiveApiKey(): String {
-        return dermAiRepo.getEffectiveApiKey()
     }
 
     fun saveSkinProfile(newProfile: SkinProfile) {

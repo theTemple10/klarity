@@ -436,7 +436,7 @@ fun VerificationResultScreen(
                     )
 
                     ingredientAnalysis.ingredients.forEach { detail ->
-                        IngredientCard(detail = detail)
+                        IngredientCard(ingredient = detail)
                     }
                 }
             }

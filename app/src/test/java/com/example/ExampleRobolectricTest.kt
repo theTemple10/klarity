@@ -3,6 +3,7 @@ package com.example
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.example.data.repository.IngredientIntelligenceEngine
+import com.example.model.IngredientAction
 import com.example.model.SkinProfile
 import com.example.model.SkinType
 import org.junit.Assert.assertEquals
@@ -42,6 +43,6 @@ class ExampleRobolectricTest {
         val analysis = engine.evaluateLocalDermatologyEngine(healthyIngredients, profile)
 
         assertEquals("EXCELLENT", analysis.overallScore)
-        assertTrue(analysis.ingredients.any { it.name.contains("Niacinamide") && it.action == "PRO" })
+        assertTrue(analysis.ingredients.any { it.name.contains("Niacinamide") && it.action == IngredientAction.PRO })
     }
 }

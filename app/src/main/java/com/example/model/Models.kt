@@ -60,9 +60,23 @@ data class VerificationReport(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+enum class SafetyRating {
+    EXCELLENT,
+    MODERATE,
+    USE_WITH_CAUTION,
+    DANGEROUS
+}
+
+enum class IngredientAction {
+    PRO,
+    CON,
+    NEUTRAL,
+    TOXIC_ALERT
+}
+
 data class IngredientDetail(
     val name: String,
-    val action: String, // "PRO", "CON", "NEUTRAL", "TOXIC_ALERT"
+    val action: IngredientAction = IngredientAction.NEUTRAL,
     val explanation: String,
     val comedogenicScore: Int? = null, // 0 to 5
     val isToxicBleach: Boolean = false
@@ -73,8 +87,13 @@ data class IngredientAnalysis(
     val overallScore: String, // "EXCELLENT", "MODERATE", "USE_WITH_CAUTION", "DANGEROUS"
     val ingredients: List<IngredientDetail>,
     val toxicWarnings: List<String> = emptyList(),
-    val skinTypeMatch: String = ""
-)
+    val skinTypeMatch: String = "",
+    val comedogenicRating: Int = 0,
+    val climateSuitability: String = ""
+) {
+    val toxicAlertWarnings: List<String> get() = toxicWarnings
+    val detailedIngredients: List<IngredientDetail> get() = ingredients
+}
 
 data class ChatMessage(
     val id: String = java.util.UUID.randomUUID().toString(),
